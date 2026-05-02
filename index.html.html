@@ -1215,16 +1215,14 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 const SUPABASE_URL = 'https://wvldnpgokmogtubkvkpc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_jAo7wpKk_Bm4Qw5GKjxekw_iPmx_oUr';
 
-// 경량 Supabase 클라이언트
+// 경량 Supabase 클라이언트 (v22 수정 - 토큰 매번 갱신, select order 동적처리)
 const _sb = {
-  _headers: {
-    'apikey': SUPABASE_KEY,
-    'Content-Type': 'application/json',
-    'Prefer': 'return=minimal'
-  },
-  _authHeaders: () => {
+  _getHeaders() {
     const session = JSON.parse(localStorage.getItem('sb-session') || 'null');
-    const h = {..._sb._headers};
+    const h = {
+      'apikey': SUPABASE_KEY,
+      'Content-Type': 'application/json',
+    };
     if(session?.access_token) h['Authorization'] = 'Bearer ' + session.access_token;
     return h;
   },
@@ -1261,42 +1259,32 @@ const _sb = {
 
   from(table) {
     const base = SUPABASE_URL + '/rest/v1/' + table;
-    const h = _sb._authHeaders();
     return {
-      async select(cols='*') {
-        const r = await fetch(base + '?select=' + cols + '&order=date.asc,sort_time.asc', {headers: {...h, 'Prefer': 'return=representation'}});
-        if(!r.ok) return {data: null, error: await r.json()};
+      async select(cols='*', orderBy='') {
+        // 테이블별 정렬 처리 (master는 order 없음)
+        const orderStr = orderBy ? '&order=' + orderBy : 
+                        (table==='events' ? '&order=date.asc,sort_time.asc' : 
+                         table==='leaves' ? '&order=date.asc' : '');
+        const h = {..._sb._getHeaders(), 'Prefer': 'return=representation'};
+        const r = await fetch(base + '?select=' + cols + orderStr, {headers: h});
+        if(!r.ok) { console.error('select error', table, await r.text()); return {data: null, error: {message: 'select failed'}}; }
         return {data: await r.json(), error: null};
       },
       async upsert(rows, opts={}) {
+        const data = Array.isArray(rows) ? rows : [rows];
+        const h = {..._sb._getHeaders(), 'Prefer': 'resolution=merge-duplicates,return=minimal'};
         const r = await fetch(base, {
-          method: 'POST',
-          headers: {...h, 'Prefer': 'resolution=merge-duplicates,return=minimal'},
-          body: JSON.stringify(rows)
+          method: 'POST', headers: h,
+          body: JSON.stringify(data)
         });
-        if(!r.ok) { const e = await r.text(); return {error: {message: e}}; }
+        if(!r.ok) { const e = await r.text(); console.error('upsert error', table, e); return {error: {message: e}}; }
         return {error: null};
-      },
-      async delete() {
-        return {
-          eq(col, val) {
-            return {
-              async then(resolve) {
-                const r = await fetch(base + '?' + col + '=eq.' + encodeURIComponent(val), {
-                  method: 'DELETE', headers: h
-                });
-                resolve(r.ok ? {error:null} : {error: {message: await r.text()}});
-              }
-            };
-          }
-        };
       },
       eq(col, val) {
         return {
           async single() {
-            const r = await fetch(base + '?select=*&' + col + '=eq.' + encodeURIComponent(val) + '&limit=1', {
-              headers: {...h, 'Accept': 'application/vnd.pgrst.object+json'}
-            });
+            const h = {..._sb._getHeaders(), 'Accept': 'application/vnd.pgrst.object+json'};
+            const r = await fetch(base + '?select=*&' + col + '=eq.' + encodeURIComponent(val) + '&limit=1', {headers: h});
             if(!r.ok) return {data: null, error: await r.text()};
             return {data: await r.json(), error: null};
           }
@@ -1551,8 +1539,7 @@ async function loadFromSupabase(){
 async function deleteFromSupabase(id){
   if(!_supabase) return;
   try{
-    const h = _sb._authHeaders();
-    const r = await fetch(SUPABASE_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(id), {method:'DELETE', headers:h});
+    const r = await fetch(SUPABASE_URL+'/rest/v1/events?id=eq.'+encodeURIComponent(id), {method:'DELETE', headers:_sb._getHeaders()});
     if(!r.ok) logError({message: await r.text()}, 'deleteFromSupabase');
   }catch(e){ logError(e,'deleteFromSupabase'); }
 }
@@ -2348,7 +2335,7 @@ function addLeave(){
 }
 function deleteLeave(id){
   leaves=leaves.filter(l=>l.id!==id);
-  fetch(SUPABASE_URL+'/rest/v1/leaves?id=eq.'+encodeURIComponent(id), {method:'DELETE', headers:_sb._authHeaders()})
+  fetch(SUPABASE_URL+'/rest/v1/leaves?id=eq.'+encodeURIComponent(id), {method:'DELETE', headers:_sb._getHeaders()})
     .catch(e=>logError(e,'deleteLeave-supabase'));
   saveData();renderLeaveEditList();render();
 }
