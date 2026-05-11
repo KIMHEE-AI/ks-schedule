@@ -2288,6 +2288,7 @@ function openEdit(id){
   document.getElementById('f-room').value=ev.room||'';
   document.getElementById('f-phone').value=ev.phone||'';
   document.getElementById('f-pw').value=ev.pw||'';
+document.getElementById('f-fee').value=ev.fee||'';
   document.getElementById('f-service').value=ev.service||'';
   document.getElementById('f-memo').value=ev.memo||'';
   renderMasterSelectors();
@@ -2309,7 +2310,7 @@ function saveEvent(){
   if(!selStaff.length){toast('담당자를 선택해주세요','err');return}
   if(!building){toast('건물명을 입력해주세요','err');return}
   if(!selType){toast('업무 유형을 선택해주세요','err');return}
-  const ev={id:editId||Date.now().toString(),date,dispTime:document.getElementById('f-disp-time').value.trim(),sortTime:document.getElementById('f-sort-time').value,staff:[...selStaff],type:selType,building,room,phone:document.getElementById('f-phone').value.trim(),pw:document.getElementById('f-pw').value.trim(),service:document.getElementById('f-service').value,memo:document.getElementById('f-memo').value.trim()};
+  const ev={id:editId||Date.now().toString(),date,dispTime:document.getElementById('f-disp-time').value.trim(),sortTime:document.getElementById('f-sort-time').value,staff:[...selStaff],type:selType,building,room,phone:document.getElementById('f-phone').value.trim(),pw:document.getElementById('f-pw').value.trim(),fee:document.getElementById('f-fee').value.trim(),service:document.getElementById('f-service').value,memo:document.getElementById('f-memo').value.trim()};
   if(editId){const idx=events.findIndex(e=>e.id===editId);if(idx!==-1)events[idx]=ev;toast('수정 완료 ✓')}
   else{events.push(ev);toast('일정 추가 ✓')}
   saveData();
@@ -2323,7 +2324,7 @@ function deleteEvent(){
   deleteFromSupabase(delId);
   saveData();closeModal('add-modal');render();toast('삭제되었습니다');
 }
-function clearForm(){['f-date','f-disp-time','f-sort-time','f-building','f-room','f-phone','f-pw','f-memo'].forEach(id=>{document.getElementById(id).value=''});document.getElementById('f-service').value=''}
+function clearForm(){['f-date','f-disp-time','f-sort-time','f-building','f-room','f-phone','f-pw','f-fee','f-memo'].forEach(id=>{document.getElementById(id).value=''});document.getElementById('f-service').value=''}
 function resetSelectors(){document.querySelectorAll('.s-btn').forEach(b=>{b.classList.remove('on');b.style.background=b.style.borderColor=b.style.color=''});document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('on'));renderMasterSelectors()}
 
 // ════ 연차/반차 ════
