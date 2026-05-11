@@ -1657,14 +1657,8 @@ async function loadFromSupabase(){
     const { data: evData, error: evErr } = await _supabase.from('events').select('*');
     if(evErr) throw evErr;
 
-    // Supabase가 비어있으면 localStorage 데이터 사용 (마이그레이션 필요 상태)
-    if(evData && evData.length === 0){
-      const localEvs = JSON.parse(localStorage.getItem('fs-events')||'[]');
-      if(localEvs.length > 0){
-        events = localEvs;
-        toast('⚠️ 서버에 데이터가 없습니다. 백업 메뉴에서 [서버에 업로드]를 눌러주세요.', 'warn');
-      }
-    } else if(evData){
+    // Supabase 데이터 우선 사용
+    if(evData){
       events = evData.map(r => ({
         id: r.id, date: r.date,
         dispTime: r.disp_time, sortTime: r.sort_time,
