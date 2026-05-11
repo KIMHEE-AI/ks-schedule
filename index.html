@@ -5,6 +5,7 @@
 <title>현장 일정 관리</title>
 <link href="./현장 일정 관리(수정)_files/css2" rel="stylesheet">
 <style>
+.mobile-bottom-bar { display: none; }
 :root {
   --bg:#f4f6fb;--surface:#fff;--surface2:#f0f2f8;--surface3:#e4e8f4;
   --border:#e2e6f0;--border2:#d0d6e8;--text:#1a1f36;--text2:#4a5270;--text3:#9aa3c0;
@@ -649,7 +650,7 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 
   /* 관리 메뉴 - 모바일 하단 바로 대체 */
   .mobile-bottom-bar {
-    display: flex !important; /* 모바일에서만 표시 */
+    display: flex !important;
     position: fixed; bottom: 0; left: 0; right: 0;
     background: var(--surface); border-top: 1px solid var(--border);
     padding: 6px 0 env(safe-area-inset-bottom);
@@ -667,7 +668,6 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   .app { padding-bottom: 60px; }
 }
 
-.mobile-bottom-bar { display: none; }
 @media (min-width: 769px) {
   .mobile-bottom-bar { display: none !important; }
   .fab-add-btn { display: none !important; }
