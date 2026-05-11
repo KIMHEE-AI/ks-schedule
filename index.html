@@ -1484,7 +1484,7 @@ async function loadFromSupabase(){
   }
   try{
     const { data: evData, error: evErr } = await _supabase
-      .from('events').select('*').order('date').order('sort_time');
+      .from('events').select('*');
     if(evErr) throw evErr;
 
     // Supabase가 비어있으면 localStorage 데이터 사용 (마이그레이션 필요 상태)
@@ -1506,7 +1506,7 @@ async function loadFromSupabase(){
     }
 
     const { data: lvData, error: lvErr } = await _supabase
-      .from('leaves').select('*').order('date');
+      .from('leaves').select('*');
     if(lvErr) throw lvErr;
     if(lvData && lvData.length > 0){
       leaves = lvData.map(r => ({ id: r.id, date: r.date, staff: r.staff, type: r.type }));
@@ -1515,7 +1515,7 @@ async function loadFromSupabase(){
     }
 
     // master(카테고리) 로드
-    const { data: mData } = await _supabase.from('master').select('data').eq('id','singleton').single();
+    const { data: mData } = await _supabase.from('master').eq('id','singleton').single();
     if(mData && mData.data){
       try{
         master = normalizeMaster(JSON.parse(mData.data));
