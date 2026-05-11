@@ -573,6 +573,106 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   padding: 8px 12px; font-size: 11px; color: #1d4ed8; margin-bottom: 12px;
 }
 
+
+/* ══ 모바일 최적화 ══ */
+@media (max-width: 768px) {
+  /* 헤더 */
+  header { padding: 0 8px; height: 48px; }
+  header .btn { padding: 3px 6px; font-size: 10px; }
+
+  /* 불필요한 헤더 버튼 숨김 */
+  .mobile-hide { display: none !important; }
+
+  /* 통계바 숨김 */
+  #top-toolbar { display: none !important; }
+
+  /* 탭바 */
+  .tabs-wrap { padding: 0 6px; }
+  .tab-btn { padding: 8px 8px; font-size: 11px; min-width: 0; }
+
+  /* 캘린더 헤더 */
+  .cal-header { padding: 6px 10px; }
+  .week-label { font-size: 12px; }
+  .week-badge { font-size: 10px; }
+
+  /* 테이블 가로 스크롤 */
+  .week-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 480px; }
+
+  /* 날짜 헤더 */
+  .th-date { padding: 5px 2px; }
+  .date-num { font-size: 13px; }
+  .date-day { font-size: 9px; }
+  .th-worker { font-size: 10px; padding: 3px 2px; }
+
+  /* 일정 셀 */
+  .td-events { padding: 2px 2px; min-height: 48px; }
+
+  /* 일정 카드 */
+  .ev-item { font-size: 9px; padding: 3px 3px; margin-bottom: 2px; }
+  .ev-building { font-size: 10px; }
+  .ev-type { font-size: 8px; padding: 1px 3px; }
+  .ev-time, .ev-meta, .ev-memo { font-size: 8px; }
+
+  /* 모달 */
+  .modal { width: 96vw !important; max-height: 88vh; overflow-y: auto; }
+  .modal-body { padding: 12px 10px; }
+  .f-row { grid-template-columns: 1fr !important; gap: 8px; }
+  .choice-grid { grid-template-columns: repeat(3,1fr) !important; gap: 4px; }
+  .choice-btn { font-size: 11px; padding: 6px 3px; }
+  .xl-modal { width: 96vw !important; }
+
+  /* 로그인 */
+  .login-box { width: 92vw; padding: 24px 16px; }
+
+  /* 선택모드바 */
+  .sel-mode-bar { padding: 6px 8px; gap: 5px; flex-wrap: wrap; }
+  .sel-bar-btn { padding: 3px 7px; font-size: 10px; }
+
+  /* 예약목록 */
+  .res-row { grid-template-columns: 58px 1fr !important; gap: 4px; }
+  .res-worker, .res-booker { display: none; }
+
+  /* 실행취소 토스트 */
+  .undo-toast { left: 10px; right: 10px; bottom: 10px; }
+
+  /* 플로팅 일정추가 버튼 */
+  .fab-add-btn {
+    position: fixed; bottom: 20px; right: 16px;
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #2563eb; color: #fff;
+    font-size: 26px; border: none;
+    box-shadow: 0 4px 16px rgba(37,99,235,.4);
+    cursor: pointer; z-index: 500;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* 관리 메뉴 - 모바일 하단 바로 대체 */
+  .mobile-bottom-bar {
+    display: flex !important; /* 모바일에서만 표시 */
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 6px 0 env(safe-area-inset-bottom);
+    z-index: 400;
+  }
+  .mobile-bottom-bar button {
+    flex: 1; background: none; border: none;
+    font-size: 9px; color: var(--text2); cursor: pointer;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 2px; padding: 4px 0; font-family: inherit;
+  }
+  .mobile-bottom-bar button span.icon { font-size: 18px; }
+
+  /* 하단 바 공간 확보 */
+  .app { padding-bottom: 60px; }
+}
+
+.mobile-bottom-bar { display: none; }
+@media (min-width: 769px) {
+  .mobile-bottom-bar { display: none !important; }
+  .fab-add-btn { display: none !important; }
+}
+
 </style>
 
 <script>
@@ -617,13 +717,13 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 <header>
   <div class="logo"><div class="logo-icon">📋</div>현장 일정 관리</div>
   <div class="header-right">
-    <button class="btn btn-ghost btn-sm" onclick="openExcelModal()">📊 엑셀 업로드</button>
-    <button class="btn btn-ghost btn-sm" onclick="enterSelMode()">☑ 선택 교체</button>
-    <button class="btn btn-ghost btn-sm" onclick="openSwapModal()">🔄 전체 교체</button>
-    <button class="btn btn-ghost btn-sm" onclick="openLeaveModal()">📅 연차/반차</button>
+    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openExcelModal()">📊 엑셀 업로드</button>
+    <button class="btn btn-ghost btn-sm mobile-hide" onclick="enterSelMode()">☑ 선택 교체</button>
+    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openSwapModal()">🔄 전체 교체</button>
+    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openLeaveModal()">📅 연차/반차</button>
     <button class="btn btn-ghost btn-sm" onclick="doSearch()">🔍 검색</button>
-    <button class="btn btn-ghost btn-sm" onclick="openBackupModal()">💾 백업</button>
-    <button class="btn btn-ghost btn-sm" onclick="openMasterModal()">⚙ 관리</button>
+    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openBackupModal()">💾 백업</button>
+    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openMasterModal()">⚙ 관리</button>
     <button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ 일정 추가</button>
     <button class="btn btn-ghost btn-sm" onclick="doLogout()" title="로그아웃">🔒 로그아웃</button>
   </div>
@@ -1209,6 +1309,34 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 <div class="undo-toast" id="undo-toast">
   <span id="undo-msg">교체 완료</span>
   <button class="undo-btn" onclick="undoSwap()">↩ 실행취소</button>
+</div>
+
+<!-- 모바일 하단 네비게이션 바 -->
+<div class="mobile-bottom-bar">
+  <button onclick="openAddModal()">
+    <span class="icon">＋</span>
+    <span>일정추가</span>
+  </button>
+  <button onclick="openSwapModal()">
+    <span class="icon">🔄</span>
+    <span>담당교체</span>
+  </button>
+  <button onclick="openLeaveModal()">
+    <span class="icon">📅</span>
+    <span>연차/반차</span>
+  </button>
+  <button onclick="openMasterModal('services')">
+    <span class="icon">⚙️</span>
+    <span>카테고리</span>
+  </button>
+  <button onclick="openBackupModal()">
+    <span class="icon">💾</span>
+    <span>백업</span>
+  </button>
+  <button onclick="doLogout()">
+    <span class="icon">🔒</span>
+    <span>로그아웃</span>
+  </button>
 </div>
 
 <div class="toast" id="toast">✅ 6건 추가 완료!</div>
