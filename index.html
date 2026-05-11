@@ -1,11 +1,9 @@
 <!DOCTYPE html>
-<!-- saved from url=(0096)file:///C:/Users/PC3/Downloads/%ED%98%84%EC%9E%A5_%EC%9D%BC%EC%A0%95_%EA%B4%80%EB%A6%AC_v11.html -->
-<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html lang="ko"><head><meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>현장 일정 관리</title>
 <link href="./현장 일정 관리(수정)_files/css2" rel="stylesheet">
 <style>
-.mobile-bottom-bar { display: none; }
 :root {
   --bg:#f4f6fb;--surface:#fff;--surface2:#f0f2f8;--surface3:#e4e8f4;
   --border:#e2e6f0;--border2:#d0d6e8;--text:#1a1f36;--text2:#4a5270;--text3:#9aa3c0;
@@ -575,134 +573,23 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 }
 
 
-/* ══ 모바일 최적화 ══ */
-@media (max-width: 768px) {
-  /* 헤더 */
-  header { padding: 0 8px; height: 48px; }
-  header .btn { padding: 3px 6px; font-size: 10px; }
-
-  /* 불필요한 헤더 버튼 숨김 */
-  .mobile-hide { display: none !important; }
-
-  /* 통계바 숨김 */
-  #top-toolbar { display: none !important; }
-
-  /* 탭바 */
-  .tabs-wrap { padding: 0 6px; }
-  .tab-btn { padding: 8px 8px; font-size: 11px; min-width: 0; }
-
-  /* 캘린더 헤더 */
-  .cal-header { padding: 6px 10px; }
-  .week-label { font-size: 12px; }
-  .week-badge { font-size: 10px; }
-
-  /* 테이블 가로 스크롤 */
-  .week-table { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  table { min-width: 480px; }
-
-  /* 날짜 헤더 */
-  .th-date { padding: 5px 2px; }
-  .date-num { font-size: 13px; }
-  .date-day { font-size: 9px; }
-  .th-worker { font-size: 10px; padding: 3px 2px; }
-
-  /* 일정 셀 */
-  .td-events { padding: 2px 2px; min-height: 48px; }
-
-  /* 일정 카드 */
-  .ev-item { font-size: 9px; padding: 3px 3px; margin-bottom: 2px; }
-  .ev-building { font-size: 10px; }
-  .ev-type { font-size: 8px; padding: 1px 3px; }
-  .ev-time, .ev-meta, .ev-memo { font-size: 8px; }
-
-  /* 모달 */
-  .modal { width: 96vw !important; max-height: 88vh; overflow-y: auto; }
-  .modal-body { padding: 12px 10px; }
-  .f-row { grid-template-columns: 1fr !important; gap: 8px; }
-  .choice-grid { grid-template-columns: repeat(3,1fr) !important; gap: 4px; }
-  .choice-btn { font-size: 11px; padding: 6px 3px; }
-  .xl-modal { width: 96vw !important; }
-
-  /* 로그인 */
-  .login-box { width: 92vw; padding: 24px 16px; }
-
-  /* 선택모드바 */
-  .sel-mode-bar { padding: 6px 8px; gap: 5px; flex-wrap: wrap; }
-  .sel-bar-btn { padding: 3px 7px; font-size: 10px; }
-
-  /* 예약목록 */
-  .res-row { grid-template-columns: 58px 1fr !important; gap: 4px; }
-  .res-worker, .res-booker { display: none; }
-
-  /* 실행취소 토스트 */
-  .undo-toast { left: 10px; right: 10px; bottom: 10px; }
-
-  /* 플로팅 일정추가 버튼 */
-  .fab-add-btn {
-    position: fixed; bottom: 20px; right: 16px;
-    width: 52px; height: 52px; border-radius: 50%;
-    background: #2563eb; color: #fff;
-    font-size: 26px; border: none;
-    box-shadow: 0 4px 16px rgba(37,99,235,.4);
-    cursor: pointer; z-index: 500;
-    display: flex; align-items: center; justify-content: center;
-  }
-
-  /* 관리 메뉴 - 모바일 하단 바로 대체 */
-  .mobile-bottom-bar {
-    display: flex !important;
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: var(--surface); border-top: 1px solid var(--border);
-    padding: 6px 0 env(safe-area-inset-bottom);
-    z-index: 400;
-  }
-  .mobile-bottom-bar button {
-    flex: 1; background: none; border: none;
-    font-size: 9px; color: var(--text2); cursor: pointer;
-    display: flex; flex-direction: column; align-items: center;
-    gap: 2px; padding: 4px 0; font-family: inherit;
-  }
-  .mobile-bottom-bar button span.icon { font-size: 18px; }
-
-  /* 하단 바 공간 확보 */
-  .app { padding-bottom: 60px; }
-}
-
-@media (min-width: 769px) {
-  .mobile-bottom-bar { display: none !important; }
-  .fab-add-btn { display: none !important; }
-}
-
-
 /* ══ 완료 처리 ══ */
-.ev-item.done {
-  opacity: .45;
-  filter: grayscale(.7);
-  border-left-color: #94a3b8 !important;
-}
+.ev-item { position: relative; }
+.ev-item.done { opacity: .45; filter: grayscale(.7); }
 .ev-item.done .ev-building { text-decoration: line-through; color: var(--text3); }
-.ev-done-badge {
-  display: inline-block;
-  background: #22c55e; color: #fff;
-  font-size: 8px; font-weight: 800;
-  padding: 1px 4px; border-radius: 3px;
-  margin-bottom: 1px;
-}
+.ev-done-badge { display: inline-block; background: #22c55e; color: #fff; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 3px; margin-bottom: 1px; }
 .ev-item.done .ev-done-badge { background: #94a3b8; }
-
-
-/* ══ 카드 완료 버튼 ══ */
 .ev-done-toggle {
   position: absolute; top: 3px; right: 3px;
   width: 18px; height: 18px; border-radius: 50%;
   border: 2px solid #cbd5e1; background: #fff;
   cursor: pointer; display: flex !important; align-items: center; justify-content: center;
   font-size: 10px; font-weight: 900; color: #94a3b8;
-  transition: all .15s; z-index: 10; flex-shrink: 0;
-  line-height: 1; opacity: 1 !important; pointer-events: all !important;
+  transition: all .15s; z-index: 10; opacity: 1 !important; pointer-events: all !important;
 }
 .ev-done-toggle:hover { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
 .ev-item.done .ev-done-toggle { border-color: #22c55e; background: #22c55e; color: #fff; }
+.mobile-bottom-bar { display: none; }
 
 </style>
 
@@ -748,13 +635,13 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 <header>
   <div class="logo"><div class="logo-icon">📋</div>현장 일정 관리</div>
   <div class="header-right">
-    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openExcelModal()">📊 엑셀 업로드</button>
-    <button class="btn btn-ghost btn-sm mobile-hide" onclick="enterSelMode()">☑ 선택 교체</button>
-    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openSwapModal()">🔄 전체 교체</button>
-    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openLeaveModal()">📅 연차/반차</button>
+    <button class="btn btn-ghost btn-sm" onclick="openExcelModal()">📊 엑셀 업로드</button>
+    <button class="btn btn-ghost btn-sm" onclick="enterSelMode()">☑ 선택 교체</button>
+    <button class="btn btn-ghost btn-sm" onclick="openSwapModal()">🔄 전체 교체</button>
+    <button class="btn btn-ghost btn-sm" onclick="openLeaveModal()">📅 연차/반차</button>
     <button class="btn btn-ghost btn-sm" onclick="doSearch()">🔍 검색</button>
-    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openBackupModal()">💾 백업</button>
-    <button class="btn btn-ghost btn-sm mobile-hide" onclick="openMasterModal()">⚙ 관리</button>
+    <button class="btn btn-ghost btn-sm" onclick="openBackupModal()">💾 백업</button>
+    <button class="btn btn-ghost btn-sm" onclick="openMasterModal()">⚙ 관리</button>
     <button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ 일정 추가</button>
     <button class="btn btn-ghost btn-sm" onclick="doLogout()" title="로그아웃">🔒 로그아웃</button>
   </div>
@@ -1035,9 +922,6 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
       <div class="f-row2">
         <div><label>고객 연락처</label><input type="text" id="f-phone" placeholder="010-0000-0000"></div>
         <div><label>비번</label><input type="text" id="f-pw" placeholder="1234, 전화하면비번"></div>
-        <div class="choice-head"><label>요금</label><button type="button" class="master-edit-btn" onclick="openMasterModal('fees')">관리</button></div>
-        <div class="choice-grid" id="fee-buttons"></div>
-        <input type="hidden" id="f-fee">
       </div>
       <div class="f-row">
         <div class="choice-head"><label>서비스 유형</label><button type="button" class="btn btn-ghost btn-sm" onclick="openMasterModal(&#39;services&#39;)">서비스 관리</button></div>
@@ -1051,9 +935,7 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
     </div>
     <div class="modal-foot">
       <button class="btn btn-danger btn-sm" id="del-btn" onclick="deleteEvent()" style="margin-right: auto;">🗑 삭제</button>
-      <button class="btn btn-ghost btn-sm" id="done-btn" onclick="toggleDoneFromModal()" style="display:none">✓ 완료</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal(&#39;add-modal&#39;)">취소</button>
-      <button class="btn btn-ghost btn-sm" id="copy-btn" onclick="copyEvent(editId)" style="display:none">📋 복사</button>
       <button class="btn btn-primary btn-sm" onclick="saveEvent()">저장</button>
     </div>
   </div>
@@ -1156,7 +1038,6 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
         <button class="master-tab active" data-master-tab="buildings" onclick="switchMasterTab(&#39;buildings&#39;,this)">건물명</button>
         <button class="master-tab" data-master-tab="services" onclick="switchMasterTab(&#39;services&#39;,this)">서비스</button>
         <button class="master-tab" data-master-tab="types" onclick="switchMasterTab(&#39;types&#39;,this)">유형</button>
-        <button class="master-tab" data-master-tab="fees" onclick="switchMasterTab(&#39;fees&#39;,this)">요금</button>
         <button class="master-tab" data-master-tab="workers" onclick="switchMasterTab(&#39;workers&#39;,this)">기사</button>
       </div>
       <div class="master-add">
@@ -1344,34 +1225,6 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   <button class="undo-btn" onclick="undoSwap()">↩ 실행취소</button>
 </div>
 
-<!-- 모바일 하단 네비게이션 바 -->
-<div class="mobile-bottom-bar">
-  <button onclick="openAddModal()">
-    <span class="icon">＋</span>
-    <span>일정추가</span>
-  </button>
-  <button onclick="openSwapModal()">
-    <span class="icon">🔄</span>
-    <span>담당교체</span>
-  </button>
-  <button onclick="openLeaveModal()">
-    <span class="icon">📅</span>
-    <span>연차/반차</span>
-  </button>
-  <button onclick="openMasterModal('services')">
-    <span class="icon">⚙️</span>
-    <span>카테고리</span>
-  </button>
-  <button onclick="openBackupModal()">
-    <span class="icon">💾</span>
-    <span>백업</span>
-  </button>
-  <button onclick="doLogout()">
-    <span class="icon">🔒</span>
-    <span>로그아웃</span>
-  </button>
-</div>
-
 <div class="toast" id="toast">✅ 6건 추가 완료!</div>
 
 <script>
@@ -1529,7 +1382,6 @@ const DEFAULT_MASTER={
   buildings:['테크트리','엘포트','아이파크','현대힐스','한화포레나','롯데캐슬','푸르지오','래미안','자이','힐스테이트'],
   services:['인터넷 (인티)','인터넷+와이파이 (인와)','올인원','셋탑박스','허브','기타'],
   types:['설치','수거','AS','이전','설치+수거','기타'],
-  fees:['22,000원','18,700원','33,000원','44,000원','55,000원','기타'],
   workers:[
     {key:'광희',name:'이광희',color:'#2563eb'},
     {key:'현준',name:'이현준',color:'#16a34a'},
@@ -1547,10 +1399,9 @@ function normalizeMaster(m){
   const b=Array.isArray(m.buildings)&&m.buildings.length?m.buildings:DEFAULT_MASTER.buildings;
   const s=Array.isArray(m.services)&&m.services.length?m.services:DEFAULT_MASTER.services;
   const t=Array.isArray(m.types)&&m.types.length?m.types:DEFAULT_MASTER.types;
-  const fe=Array.isArray(m.fees)&&m.fees.length?m.fees:DEFAULT_MASTER.fees;
   let w=Array.isArray(m.workers)&&m.workers.length?m.workers:DEFAULT_MASTER.workers;
   w=w.map(x=>typeof x==='string'?{key:x,name:STAFF_NAME[x]||x,color:STAFF_COLOR[x]||'#64748b'}:{key:x.key||x.name,name:x.name||x.key,color:x.color||STAFF_COLOR[x.key]||'#64748b'}).filter(x=>x.key);
-  return {buildings:[...new Set(b.map(x=>String(x).trim()).filter(Boolean))],services:[...new Set(s.map(x=>String(x).trim()).filter(Boolean))],types:[...new Set(t.map(x=>String(x).trim()).filter(Boolean))],fees:[...new Set(fe.map(x=>String(x).trim()).filter(Boolean))],workers:w};
+  return {buildings:[...new Set(b.map(x=>String(x).trim()).filter(Boolean))],services:[...new Set(s.map(x=>String(x).trim()).filter(Boolean))],types:[...new Set(t.map(x=>String(x).trim()).filter(Boolean))],workers:w};
 }
 function saveMaster(){
   master=normalizeMaster(master);
@@ -1582,7 +1433,7 @@ let events = [];
 let leaves = [];
 let master=loadMaster();
 applyMasterToRuntime();
-let curWeekStart=getMonday(new Date()); // 항상 오늘 기준 현재 주로 시작
+let curWeekStart=getMonday(new Date());
 let tabStaff='전체',tabType='전체',tabWorker='전체';
 let editId=null,selStaff=[],selType=null,currentView='calendar';
 // 선택 모드 & 교체
@@ -1625,7 +1476,6 @@ async function saveToSupabase(){
         room: ev.room || '',
         phone: ev.phone || '',
         pw: ev.pw || '',
-        fee: ev.fee || '',
         done: ev.done || false,
         service: ev.service || '',
         memo: ev.memo || ''
@@ -1657,20 +1507,13 @@ async function loadFromSupabase(){
     const { data: evData, error: evErr } = await _supabase.from('events').select('*');
     if(evErr) throw evErr;
 
-    // Supabase가 비어있으면 localStorage 데이터 사용 (마이그레이션 필요 상태)
-    if(evData && evData.length === 0){
-      const localEvs = JSON.parse(localStorage.getItem('fs-events')||'[]');
-      if(localEvs.length > 0){
-        events = localEvs;
-        toast('⚠️ 서버에 데이터가 없습니다. 백업 메뉴에서 [서버에 업로드]를 눌러주세요.', 'warn');
-      }
-    } else if(evData){
+    if(evData){
       events = evData.map(r => ({
         id: r.id, date: r.date,
         dispTime: r.disp_time, sortTime: r.sort_time,
         staff: r.staff || [], type: r.type,
         building: r.building, room: r.room,
-        phone: r.phone, pw: r.pw, fee: r.fee, done: r.done || false,
+        phone: r.phone, pw: r.pw, done: r.done || false,
         service: r.service, memo: r.memo
       }));
     }
@@ -2010,11 +1853,11 @@ function render(){
         const memo=ev.memo?highlightKw(ev.memo):'';
 
         const div=document.createElement('div');
+        div.dataset.id=ev.id;
         const isDone = ev.done === true;
         div.className='ev-item'+(selMode&&selSet.has(ev.id)?' selected':'')+(isDone?' done':'');
         div.style.borderLeftColor=isDone?'#94a3b8':ts.c;
         div.style.background=isDone?'#f1f5f9':ts.bg+'80';
-        div.dataset.id=ev.id;
         div.innerHTML=`
           <div class="ev-cb-wrap"><input type="checkbox" ${selSet.has(ev.id)?'checked':''} onclick="event.stopPropagation();toggleSel('${ev.id}',this)"></div>
           <button class="ev-done-toggle" onclick="event.stopPropagation();toggleDone('${ev.id}')" title="${isDone?'완료 취소':'완료 처리'}">${isDone?'✓':''}</button>
@@ -2023,11 +1866,9 @@ function render(){
           <div class="ev-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
           ${ev.dispTime?`<div class="ev-time">${escHtml(ev.dispTime)}</div>`:''}
           ${ev.phone?`<div class="ev-meta">${escHtml(ev.phone)}</div>`:''}
-          ${ev.fee?`<div class="ev-meta" style="color:${isDone?'#94a3b8':'#2563eb'};font-weight:800">${escHtml(ev.fee)}</div>`:''}
           ${memo?`<div class="ev-memo">${memo}</div>`:''}
         `;
         div.onclick=selMode ? ()=>toggleSelCard(ev.id,div) : ()=>openEdit(ev.id);
-
         td.appendChild(div);
       });
 
@@ -2316,12 +2157,6 @@ function renderMasterSelectors(){
     const cur=document.getElementById('f-type')?.value||'';
     tWrap.innerHTML=(master.types||DEFAULT_MASTER.types).map(v=>`<button type="button" class="choice-btn ${v===cur?'on':''}" onclick="selectTypeVal('${escapeJs(v)}')">${escHtml(v)}</button>`).join('');
   }
-  // 요금 버튼 동적 렌더링
-  const feeWrap=document.getElementById('fee-buttons');
-  if(feeWrap){
-    const curFee=document.getElementById('f-fee')?.value||'';
-    feeWrap.innerHTML=(master.fees||DEFAULT_MASTER.fees).map(v=>`<button type="button" class="choice-btn${v===curFee?' on':''}" onclick="selectFeeValue('${escapeJs(v)}')">${escHtml(v)}</button>`).join('');
-  }
   // 모달 유형 버튼 동적 렌더링
   const mTypeSel=document.getElementById('modal-type-sel');
   if(mTypeSel){
@@ -2373,7 +2208,7 @@ function switchMasterTab(tab,btn){
 function getMasterArray(){return activeMasterTab==='workers'?master.workers:master[activeMasterTab]}
 function renderMasterList(){
   const list=document.getElementById('master-list'); if(!list)return;
-  const titleMap={buildings:'건물명',services:'서비스',types:'유형',fees:'요금',workers:'기사'};
+  const titleMap={buildings:'건물명',services:'서비스',types:'유형',workers:'기사'};
   const arr=getMasterArray();
   if(!arr.length){list.innerHTML=`<div class="empty">등록된 ${titleMap[activeMasterTab]}이 없습니다.</div>`;return}
   list.innerHTML=arr.map((item,i)=>{
@@ -2440,8 +2275,6 @@ function openAddModal(dateStr,workerPreset){
   presetDate=dateStr||null;presetWorker=workerPreset||null;
   document.getElementById('add-modal-title').textContent='새 일정 추가';
   document.getElementById('del-btn').style.display='none';
-  const _doneBtn=document.getElementById('done-btn'); if(_doneBtn) _doneBtn.style.display='none';
-  const _copyBtn=document.getElementById('copy-btn'); if(_copyBtn) _copyBtn.style.display='none';
   clearForm();resetSelectors();renderMasterSelectors();
   if(dateStr)document.getElementById('f-date').value=dateStr;
   // 기사 자동 선택
@@ -2462,10 +2295,6 @@ function openEdit(id){
   editId=id;selStaff=[...(ev.staff||[])];selType=ev.type;
   document.getElementById('add-modal-title').textContent='일정 수정';
   document.getElementById('del-btn').style.display='';
-  const _ev = events.find(e=>e.id===id);
-  const doneBtn = document.getElementById('done-btn');
-  if(doneBtn){ doneBtn.style.display=''; doneBtn.textContent = _ev?.done ? '↩ 완료취소' : '✓ 완료'; doneBtn.style.color = _ev?.done ? '#dc2626' : '#15803d'; }
-  const copyBtn = document.getElementById('copy-btn'); if(copyBtn) copyBtn.style.display='';
   document.getElementById('f-date').value=ev.date||'';
   document.getElementById('f-disp-time').value=ev.dispTime||'';
   document.getElementById('f-sort-time').value=ev.sortTime||'';
@@ -2473,8 +2302,6 @@ function openEdit(id){
   document.getElementById('f-room').value=ev.room||'';
   document.getElementById('f-phone').value=ev.phone||'';
   document.getElementById('f-pw').value=ev.pw||'';
-  document.getElementById('f-fee').value=ev.fee||'';
-  document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.toggle('on',b.textContent===(ev.fee||'')));
   document.getElementById('f-service').value=ev.service||'';
   document.getElementById('f-memo').value=ev.memo||'';
   renderMasterSelectors();
@@ -2496,7 +2323,7 @@ function saveEvent(){
   if(!selStaff.length){toast('담당자를 선택해주세요','err');return}
   if(!building){toast('건물명을 입력해주세요','err');return}
   if(!selType){toast('업무 유형을 선택해주세요','err');return}
-  const ev={id:editId||Date.now().toString(),date,dispTime:document.getElementById('f-disp-time').value.trim(),sortTime:document.getElementById('f-sort-time').value,staff:[...selStaff],type:selType,building,room,phone:document.getElementById('f-phone').value.trim(),pw:document.getElementById('f-pw').value.trim(),fee:document.getElementById('f-fee').value.trim(),service:document.getElementById('f-service').value,memo:document.getElementById('f-memo').value.trim()};
+  const ev={id:editId||Date.now().toString(),date,dispTime:document.getElementById('f-disp-time').value.trim(),sortTime:document.getElementById('f-sort-time').value,staff:[...selStaff],type:selType,building,room,phone:document.getElementById('f-phone').value.trim(),pw:document.getElementById('f-pw').value.trim(),service:document.getElementById('f-service').value,memo:document.getElementById('f-memo').value.trim()};
   if(editId){const idx=events.findIndex(e=>e.id===editId);if(idx!==-1)events[idx]=ev;toast('수정 완료 ✓')}
   else{events.push(ev);toast('일정 추가 ✓')}
   saveData();
@@ -2510,8 +2337,8 @@ function deleteEvent(){
   deleteFromSupabase(delId);
   saveData();closeModal('add-modal');render();toast('삭제되었습니다');
 }
-function clearForm(){['f-date','f-disp-time','f-sort-time','f-building','f-room','f-phone','f-pw','f-fee','f-memo'].forEach(id=>{document.getElementById(id).value=''});document.getElementById('f-service').value=''}
-function resetSelectors(){document.querySelectorAll('.s-btn').forEach(b=>{b.classList.remove('on');b.style.background=b.style.borderColor=b.style.color=''});document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.remove('on'));renderMasterSelectors()}
+function clearForm(){['f-date','f-disp-time','f-sort-time','f-building','f-room','f-phone','f-pw','f-memo'].forEach(id=>{document.getElementById(id).value=''});document.getElementById('f-service').value=''}
+function resetSelectors(){document.querySelectorAll('.s-btn').forEach(b=>{b.classList.remove('on');b.style.background=b.style.borderColor=b.style.color=''});document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('on'));renderMasterSelectors()}
 
 // ════ 연차/반차 ════
 function openLeaveModal(){renderLeaveEditList();openModal('leave-modal')}
@@ -3172,7 +2999,7 @@ async function uploadToServer(){
         disp_time:ev.dispTime||'', sort_time:ev.sortTime||'',
         staff:ev.staff||[], type:ev.type||'기타',
         building:ev.building||'', room:ev.room||'',
-        phone:ev.phone||'', pw:ev.pw||'', fee:ev.fee||'',
+        phone:ev.phone||'', pw:ev.pw||'',
         service:ev.service||'', memo:ev.memo||''
       }));
       const {error:e1} = await _supabase.from('events').upsert(rows,{onConflict:'id'});
@@ -3217,13 +3044,6 @@ function startAutoRefresh() {
 }
 
 
-function selectFeeValue(v){
-  const el=document.getElementById('f-fee');
-  if(el) el.value=el.value===v?'':v;
-  document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.toggle('on',b.textContent===v&&el.value===v));
-}
-
-
 // ════ 완료 처리 ════
 function toggleDone(id) {
   const ev = events.find(e => e.id === id);
@@ -3234,30 +3054,13 @@ function toggleDone(id) {
   toast(ev.done ? '✓ 완료 처리됨' : '↩ 완료 취소됨');
 }
 
-function toggleDoneFromModal() {
-  if (!editId) return;
-  const ev = events.find(e => e.id === editId);
-  if (!ev) return;
-  ev.done = !ev.done;
-  saveData();
-  render();
-  closeModal('add-modal');
-  toast(ev.done ? '✓ 완료 처리됨' : '↩ 완료 취소됨');
-}
-
 // ════ 일정 복사 ════
 function copyEvent(id) {
   const ev = events.find(e => e.id === id);
   if (!ev) return;
-  const newEv = {
-    ...ev,
-    id: Date.now().toString() + Math.random().toString(36).slice(2,6),
-    done: false,
-  };
+  const newEv = {...ev, id: Date.now().toString()+Math.random().toString(36).slice(2,6), done: false};
   events.push(newEv);
-  saveData();
-  render();
-  closeModal('add-modal');
+  saveData(); render(); closeModal('add-modal');
   toast('📋 일정 복사 완료!');
 }
 
