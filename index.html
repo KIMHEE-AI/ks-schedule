@@ -904,6 +904,7 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
       <div class="f-row2">
         <div><label>고객 연락처</label><input type="text" id="f-phone" placeholder="010-0000-0000"></div>
         <div><label>비번</label><input type="text" id="f-pw" placeholder="1234, 전화하면비번"></div>
+        <div><label>요금</label><input type="text" id="f-fee" placeholder="예: 33,000원"></div>
       </div>
       <div class="f-row">
         <div class="choice-head"><label>서비스 유형</label><button type="button" class="btn btn-ghost btn-sm" onclick="openMasterModal(&#39;services&#39;)">서비스 관리</button></div>
@@ -1413,7 +1414,7 @@ let events = [];
 let leaves = [];
 let master=loadMaster();
 applyMasterToRuntime();
-let curWeekStart=getMonday(localStorage.getItem('fs-current-week-start')||new Date());
+let curWeekStart=getMonday(new Date());
 let tabStaff='전체',tabType='전체',tabWorker='전체';
 let editId=null,selStaff=[],selType=null,currentView='calendar';
 // 선택 모드 & 교체
