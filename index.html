@@ -904,7 +904,9 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
       <div class="f-row2">
         <div><label>고객 연락처</label><input type="text" id="f-phone" placeholder="010-0000-0000"></div>
         <div><label>비번</label><input type="text" id="f-pw" placeholder="1234, 전화하면비번"></div>
-        <div><label>요금</label><input type="text" id="f-fee" placeholder="예: 33,000원"></div>
+        <div class="choice-head"><label>요금</label><button type="button" class="master-edit-btn" onclick="openMasterModal('fees')">관리</button></div>
+        <div class="choice-grid" id="fee-buttons"></div>
+        <input type="hidden" id="f-fee">
       </div>
       <div class="f-row">
         <div class="choice-head"><label>서비스 유형</label><button type="button" class="btn btn-ghost btn-sm" onclick="openMasterModal(&#39;services&#39;)">서비스 관리</button></div>
@@ -1021,6 +1023,7 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
         <button class="master-tab active" data-master-tab="buildings" onclick="switchMasterTab(&#39;buildings&#39;,this)">건물명</button>
         <button class="master-tab" data-master-tab="services" onclick="switchMasterTab(&#39;services&#39;,this)">서비스</button>
         <button class="master-tab" data-master-tab="types" onclick="switchMasterTab(&#39;types&#39;,this)">유형</button>
+        <button class="master-tab" data-master-tab="fees" onclick="switchMasterTab(&#39;fees&#39;,this)">요금</button>
         <button class="master-tab" data-master-tab="workers" onclick="switchMasterTab(&#39;workers&#39;,this)">기사</button>
       </div>
       <div class="master-add">
@@ -1322,6 +1325,7 @@ async function doLogin() {
   document.getElementById('login-pw').value = '';
   await loadFromSupabase();
   render();
+  startAutoRefresh();
 }
 
 async function doLogout() {
@@ -1339,6 +1343,7 @@ window.addEventListener('load', async function() {
       document.getElementById('login-screen').classList.add('hidden');
       await loadFromSupabase();
       render();
+      startAutoRefresh();
     } else {
       document.getElementById('login-screen').classList.remove('hidden');
     }
@@ -1363,6 +1368,7 @@ const DEFAULT_MASTER={
   buildings:['테크트리','엘포트','아이파크','현대힐스','한화포레나','롯데캐슬','푸르지오','래미안','자이','힐스테이트'],
   services:['인터넷 (인티)','인터넷+와이파이 (인와)','올인원','셋탑박스','허브','기타'],
   types:['설치','수거','AS','이전','설치+수거','기타'],
+  fees:['22,000원','18,700원','33,000원','44,000원','55,000원','기타'],
   workers:[
     {key:'광희',name:'이광희',color:'#2563eb'},
     {key:'현준',name:'이현준',color:'#16a34a'},
@@ -1380,9 +1386,10 @@ function normalizeMaster(m){
   const b=Array.isArray(m.buildings)&&m.buildings.length?m.buildings:DEFAULT_MASTER.buildings;
   const s=Array.isArray(m.services)&&m.services.length?m.services:DEFAULT_MASTER.services;
   const t=Array.isArray(m.types)&&m.types.length?m.types:DEFAULT_MASTER.types;
+  const fe=Array.isArray(m.fees)&&m.fees.length?m.fees:DEFAULT_MASTER.fees;
   let w=Array.isArray(m.workers)&&m.workers.length?m.workers:DEFAULT_MASTER.workers;
   w=w.map(x=>typeof x==='string'?{key:x,name:STAFF_NAME[x]||x,color:STAFF_COLOR[x]||'#64748b'}:{key:x.key||x.name,name:x.name||x.key,color:x.color||STAFF_COLOR[x.key]||'#64748b'}).filter(x=>x.key);
-  return {buildings:[...new Set(b.map(x=>String(x).trim()).filter(Boolean))],services:[...new Set(s.map(x=>String(x).trim()).filter(Boolean))],types:[...new Set(t.map(x=>String(x).trim()).filter(Boolean))],workers:w};
+  return {buildings:[...new Set(b.map(x=>String(x).trim()).filter(Boolean))],services:[...new Set(s.map(x=>String(x).trim()).filter(Boolean))],types:[...new Set(t.map(x=>String(x).trim()).filter(Boolean))],fees:[...new Set(fe.map(x=>String(x).trim()).filter(Boolean))],workers:w};
 }
 function saveMaster(){
   master=normalizeMaster(master);
@@ -1414,7 +1421,7 @@ let events = [];
 let leaves = [];
 let master=loadMaster();
 applyMasterToRuntime();
-let curWeekStart=getMonday(new Date());
+let curWeekStart=getMonday(new Date()); // 항상 오늘 기준 현재 주로 시작
 let tabStaff='전체',tabType='전체',tabWorker='전체';
 let editId=null,selStaff=[],selType=null,currentView='calendar';
 // 선택 모드 & 교체
@@ -1457,6 +1464,7 @@ async function saveToSupabase(){
         room: ev.room || '',
         phone: ev.phone || '',
         pw: ev.pw || '',
+        fee: ev.fee || '',
         service: ev.service || '',
         memo: ev.memo || ''
       }));
@@ -1484,8 +1492,7 @@ async function loadFromSupabase(){
     return;
   }
   try{
-    const { data: evData, error: evErr } = await _supabase
-      .from('events').select('*');
+    const { data: evData, error: evErr } = await _supabase.from('events').select('*');
     if(evErr) throw evErr;
 
     // Supabase가 비어있으면 localStorage 데이터 사용 (마이그레이션 필요 상태)
@@ -1501,13 +1508,12 @@ async function loadFromSupabase(){
         dispTime: r.disp_time, sortTime: r.sort_time,
         staff: r.staff || [], type: r.type,
         building: r.building, room: r.room,
-        phone: r.phone, pw: r.pw,
+        phone: r.phone, pw: r.pw, fee: r.fee,
         service: r.service, memo: r.memo
       }));
     }
 
-    const { data: lvData, error: lvErr } = await _supabase
-      .from('leaves').select('*');
+    const { data: lvData, error: lvErr } = await _supabase.from('leaves').select('*');
     if(lvErr) throw lvErr;
     if(lvData && lvData.length > 0){
       leaves = lvData.map(r => ({ id: r.id, date: r.date, staff: r.staff, type: r.type }));
@@ -1852,6 +1858,7 @@ function render(){
           <div class="ev-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
           ${ev.dispTime?`<div class="ev-time">${escHtml(ev.dispTime)}</div>`:''}
           ${ev.phone?`<div class="ev-meta">${escHtml(ev.phone)}</div>`:''}
+          ${ev.fee?`<div class="ev-meta" style="color:#2563eb;font-weight:800">${escHtml(ev.fee)}</div>`:''}
           ${memo?`<div class="ev-memo">${memo}</div>`:''}
         `;
         div.onclick=selMode ? ()=>toggleSelCard(ev.id,div) : ()=>openEdit(ev.id);
@@ -2143,6 +2150,12 @@ function renderMasterSelectors(){
     const cur=document.getElementById('f-type')?.value||'';
     tWrap.innerHTML=(master.types||DEFAULT_MASTER.types).map(v=>`<button type="button" class="choice-btn ${v===cur?'on':''}" onclick="selectTypeVal('${escapeJs(v)}')">${escHtml(v)}</button>`).join('');
   }
+  // 요금 버튼 동적 렌더링
+  const feeWrap=document.getElementById('fee-buttons');
+  if(feeWrap){
+    const curFee=document.getElementById('f-fee')?.value||'';
+    feeWrap.innerHTML=(master.fees||DEFAULT_MASTER.fees).map(v=>`<button type="button" class="choice-btn${v===curFee?' on':''}" onclick="selectFeeValue('${escapeJs(v)}')">${escHtml(v)}</button>`).join('');
+  }
   // 모달 유형 버튼 동적 렌더링
   const mTypeSel=document.getElementById('modal-type-sel');
   if(mTypeSel){
@@ -2194,7 +2207,7 @@ function switchMasterTab(tab,btn){
 function getMasterArray(){return activeMasterTab==='workers'?master.workers:master[activeMasterTab]}
 function renderMasterList(){
   const list=document.getElementById('master-list'); if(!list)return;
-  const titleMap={buildings:'건물명',services:'서비스',types:'유형',workers:'기사'};
+  const titleMap={buildings:'건물명',services:'서비스',types:'유형',fees:'요금',workers:'기사'};
   const arr=getMasterArray();
   if(!arr.length){list.innerHTML=`<div class="empty">등록된 ${titleMap[activeMasterTab]}이 없습니다.</div>`;return}
   list.innerHTML=arr.map((item,i)=>{
@@ -2288,8 +2301,8 @@ function openEdit(id){
   document.getElementById('f-room').value=ev.room||'';
   document.getElementById('f-phone').value=ev.phone||'';
   document.getElementById('f-pw').value=ev.pw||'';
-document.getElementById('f-fee').value=ev.fee||'';
-document.getElementById('f-fee').value=ev.fee||'';
+  document.getElementById('f-fee').value=ev.fee||'';
+  document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.toggle('on',b.textContent===(ev.fee||'')));
   document.getElementById('f-service').value=ev.service||'';
   document.getElementById('f-memo').value=ev.memo||'';
   renderMasterSelectors();
@@ -2326,7 +2339,7 @@ function deleteEvent(){
   saveData();closeModal('add-modal');render();toast('삭제되었습니다');
 }
 function clearForm(){['f-date','f-disp-time','f-sort-time','f-building','f-room','f-phone','f-pw','f-fee','f-memo'].forEach(id=>{document.getElementById(id).value=''});document.getElementById('f-service').value=''}
-function resetSelectors(){document.querySelectorAll('.s-btn').forEach(b=>{b.classList.remove('on');b.style.background=b.style.borderColor=b.style.color=''});document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('on'));renderMasterSelectors()}
+function resetSelectors(){document.querySelectorAll('.s-btn').forEach(b=>{b.classList.remove('on');b.style.background=b.style.borderColor=b.style.color=''});document.querySelectorAll('.t-btn').forEach(b=>b.classList.remove('on'));document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.remove('on'));renderMasterSelectors()}
 
 // ════ 연차/반차 ════
 function openLeaveModal(){renderLeaveEditList();openModal('leave-modal')}
@@ -2987,7 +3000,7 @@ async function uploadToServer(){
         disp_time:ev.dispTime||'', sort_time:ev.sortTime||'',
         staff:ev.staff||[], type:ev.type||'기타',
         building:ev.building||'', room:ev.room||'',
-        phone:ev.phone||'', pw:ev.pw||'',
+        phone:ev.phone||'', pw:ev.pw||'', fee:ev.fee||'',
         service:ev.service||'', memo:ev.memo||''
       }));
       const {error:e1} = await _supabase.from('events').upsert(rows,{onConflict:'id'});
@@ -3015,7 +3028,29 @@ async function uploadToServer(){
   }
 }
 
-function startAutoRefresh(){setInterval(async function(){if(!_supabase)return;try{await loadFromSupabase();render();}catch(e){}},10000);}
+
+// ════ 10초마다 자동 데이터 갱신 ════
+let _autoRefreshTimer = null;
+
+function startAutoRefresh() {
+  if (_autoRefreshTimer) clearInterval(_autoRefreshTimer);
+  _autoRefreshTimer = setInterval(async () => {
+    if (!_supabase) return;
+    try {
+      const prevCount = events.length;
+      await loadFromSupabase();
+      render();
+    } catch(e) {}
+  }, 10000); // 10초
+}
+
+
+function selectFeeValue(v){
+  const el=document.getElementById('f-fee');
+  if(el) el.value=el.value===v?'':v;
+  document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.toggle('on',b.textContent===v&&el.value===v));
+}
+
 </script>>>
 
 
