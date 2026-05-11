@@ -3012,6 +3012,7 @@ async function uploadToServer(){
   }
 }
 
+function startAutoRefresh(){setInterval(async function(){if(!_supabase)return;try{await loadFromSupabase();render();}catch(e){}},10000);}
 </script>>>
 
 
