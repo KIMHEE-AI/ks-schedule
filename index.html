@@ -673,6 +673,37 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   .fab-add-btn { display: none !important; }
 }
 
+
+/* ══ 완료 처리 ══ */
+.ev-item.done {
+  opacity: .45;
+  filter: grayscale(.7);
+  border-left-color: #94a3b8 !important;
+}
+.ev-item.done .ev-building { text-decoration: line-through; color: var(--text3); }
+.ev-done-badge {
+  display: inline-block;
+  background: #22c55e; color: #fff;
+  font-size: 8px; font-weight: 800;
+  padding: 1px 4px; border-radius: 3px;
+  margin-bottom: 1px;
+}
+.ev-item.done .ev-done-badge { background: #94a3b8; }
+
+
+/* ══ 카드 완료 버튼 ══ */
+.ev-done-toggle {
+  position: absolute; top: 3px; right: 3px;
+  width: 18px; height: 18px; border-radius: 50%;
+  border: 2px solid #cbd5e1; background: #fff;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 900; color: #94a3b8;
+  transition: all .15s; z-index: 3; flex-shrink: 0;
+  line-height: 1;
+}
+.ev-done-toggle:hover { border-color: #22c55e; color: #22c55e; background: #f0fdf4; }
+.ev-item.done .ev-done-toggle { border-color: #22c55e; background: #22c55e; color: #fff; }
+
 </style>
 
 <script>
@@ -1020,7 +1051,9 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
     </div>
     <div class="modal-foot">
       <button class="btn btn-danger btn-sm" id="del-btn" onclick="deleteEvent()" style="margin-right: auto;">🗑 삭제</button>
+      <button class="btn btn-ghost btn-sm" id="done-btn" onclick="toggleDoneFromModal()" style="display:none">✓ 완료</button>
       <button class="btn btn-ghost btn-sm" onclick="closeModal(&#39;add-modal&#39;)">취소</button>
+      <button class="btn btn-ghost btn-sm" id="copy-btn" onclick="copyEvent(editId)" style="display:none">📋 복사</button>
       <button class="btn btn-primary btn-sm" onclick="saveEvent()">저장</button>
     </div>
   </div>
@@ -1593,6 +1626,7 @@ async function saveToSupabase(){
         phone: ev.phone || '',
         pw: ev.pw || '',
         fee: ev.fee || '',
+        done: ev.done || false,
         service: ev.service || '',
         memo: ev.memo || ''
       }));
@@ -1636,7 +1670,7 @@ async function loadFromSupabase(){
         dispTime: r.disp_time, sortTime: r.sort_time,
         staff: r.staff || [], type: r.type,
         building: r.building, room: r.room,
-        phone: r.phone, pw: r.pw, fee: r.fee,
+        phone: r.phone, pw: r.pw, fee: r.fee, done: r.done || false,
         service: r.service, memo: r.memo
       }));
     }
@@ -1976,20 +2010,24 @@ function render(){
         const memo=ev.memo?highlightKw(ev.memo):'';
 
         const div=document.createElement('div');
-        div.className='ev-item'+(selMode&&selSet.has(ev.id)?' selected':'');
-        div.style.borderLeftColor=ts.c;
-        div.style.background=ts.bg+'80';
+        const isDone = ev.done === true;
+        div.className='ev-item'+(selMode&&selSet.has(ev.id)?' selected':'')+(isDone?' done':'');
+        div.style.borderLeftColor=isDone?'#94a3b8':ts.c;
+        div.style.background=isDone?'#f1f5f9':ts.bg+'80';
         div.dataset.id=ev.id;
         div.innerHTML=`
           <div class="ev-cb-wrap"><input type="checkbox" ${selSet.has(ev.id)?'checked':''} onclick="event.stopPropagation();toggleSel('${ev.id}',this)"></div>
-          <span class="ev-type" style="background:${ts.bg};color:${ts.c}">${ev.type}</span>
+          <button class="ev-done-toggle" onclick="event.stopPropagation();toggleDone('${ev.id}')" title="${isDone?'완료 취소':'완료 처리'}">${isDone?'✓':''}</button>
+          ${isDone?'<span class="ev-done-badge">✓ 완료</span>':''}
+          <span class="ev-type" style="background:${isDone?'#e2e8f0':''+ts.bg};color:${isDone?'#64748b':''+ts.c}">${ev.type}</span>
           <div class="ev-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
           ${ev.dispTime?`<div class="ev-time">${escHtml(ev.dispTime)}</div>`:''}
           ${ev.phone?`<div class="ev-meta">${escHtml(ev.phone)}</div>`:''}
-          ${ev.fee?`<div class="ev-meta" style="color:#2563eb;font-weight:800">${escHtml(ev.fee)}</div>`:''}
+          ${ev.fee?`<div class="ev-meta" style="color:${isDone?'#94a3b8':'#2563eb'};font-weight:800">${escHtml(ev.fee)}</div>`:''}
           ${memo?`<div class="ev-memo">${memo}</div>`:''}
         `;
         div.onclick=selMode ? ()=>toggleSelCard(ev.id,div) : ()=>openEdit(ev.id);
+
         td.appendChild(div);
       });
 
@@ -2402,6 +2440,8 @@ function openAddModal(dateStr,workerPreset){
   presetDate=dateStr||null;presetWorker=workerPreset||null;
   document.getElementById('add-modal-title').textContent='새 일정 추가';
   document.getElementById('del-btn').style.display='none';
+  const _doneBtn=document.getElementById('done-btn'); if(_doneBtn) _doneBtn.style.display='none';
+  const _copyBtn=document.getElementById('copy-btn'); if(_copyBtn) _copyBtn.style.display='none';
   clearForm();resetSelectors();renderMasterSelectors();
   if(dateStr)document.getElementById('f-date').value=dateStr;
   // 기사 자동 선택
@@ -2422,6 +2462,10 @@ function openEdit(id){
   editId=id;selStaff=[...(ev.staff||[])];selType=ev.type;
   document.getElementById('add-modal-title').textContent='일정 수정';
   document.getElementById('del-btn').style.display='';
+  const _ev = events.find(e=>e.id===id);
+  const doneBtn = document.getElementById('done-btn');
+  if(doneBtn){ doneBtn.style.display=''; doneBtn.textContent = _ev?.done ? '↩ 완료취소' : '✓ 완료'; doneBtn.style.color = _ev?.done ? '#dc2626' : '#15803d'; }
+  const copyBtn = document.getElementById('copy-btn'); if(copyBtn) copyBtn.style.display='';
   document.getElementById('f-date').value=ev.date||'';
   document.getElementById('f-disp-time').value=ev.dispTime||'';
   document.getElementById('f-sort-time').value=ev.sortTime||'';
@@ -3177,6 +3221,44 @@ function selectFeeValue(v){
   const el=document.getElementById('f-fee');
   if(el) el.value=el.value===v?'':v;
   document.querySelectorAll('#fee-buttons .choice-btn').forEach(b=>b.classList.toggle('on',b.textContent===v&&el.value===v));
+}
+
+
+// ════ 완료 처리 ════
+function toggleDone(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  ev.done = !ev.done;
+  saveData();
+  render();
+  toast(ev.done ? '✓ 완료 처리됨' : '↩ 완료 취소됨');
+}
+
+function toggleDoneFromModal() {
+  if (!editId) return;
+  const ev = events.find(e => e.id === editId);
+  if (!ev) return;
+  ev.done = !ev.done;
+  saveData();
+  render();
+  closeModal('add-modal');
+  toast(ev.done ? '✓ 완료 처리됨' : '↩ 완료 취소됨');
+}
+
+// ════ 일정 복사 ════
+function copyEvent(id) {
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  const newEv = {
+    ...ev,
+    id: Date.now().toString() + Math.random().toString(36).slice(2,6),
+    done: false,
+  };
+  events.push(newEv);
+  saveData();
+  render();
+  closeModal('add-modal');
+  toast('📋 일정 복사 완료!');
 }
 
 </script>>>
