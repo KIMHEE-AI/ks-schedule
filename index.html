@@ -118,7 +118,7 @@ table{width:100%;border-collapse:collapse;table-layout:auto}
 .worker-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 
 /* 일정 셀 */
-.td-events{border:1px solid var(--border);padding:4px;vertical-align:top;background:var(--surface);min-width:120px;min-height:400px;width:120px}
+.td-events{border:1px solid var(--border);padding:4px;vertical-align:top;background:var(--surface);min-width:120px;min-height:200px;width:120px}
 .td-events.today-col{background:#fafcff}
 .td-events:hover{background:var(--surface2)}
 
@@ -3083,64 +3083,103 @@ function copyEvent(id) {
 
 
 
-<style id="mobile-optimize">
-/* ══ 모바일 최적화 (640px 이하) ══ */
+
+
+
+
+
+<style id="mobile-opt">
 @media (max-width: 640px) {
-
-  /* 헤더 */
-  header { height: 44px !important; padding: 0 8px !important; }
-  .logo { font-size: 12px !important; gap: 5px !important; }
-  .logo-icon { width: 22px !important; height: 22px !important; font-size: 11px !important; border-radius: 6px !important; }
-  .btn-sm { padding: 4px 8px !important; font-size: 11px !important; }
-
-  /* 탭바 */
-  .tabs-wrap { padding: 0 6px !important; }
-  .tab-item { padding: 7px 8px !important; font-size: 11px !important; gap: 3px !important; }
-
-  /* 통계바 */
-  .top-toolbar { padding: 3px 8px !important; min-height: 32px !important; }
-  .summary-main { font-size: 11px !important; gap: 4px !important; }
-  .summary-chip { font-size: 11px !important; }
-  .stats-summary { min-height: 24px !important; }
-
-  /* 캘린더 헤더 */
-  .cal-header { padding: 5px 10px !important; }
-  .cal-title { font-size: 12px !important; }
-  .week-badge { font-size: 10px !important; padding: 1px 5px !important; }
-  .view-btn { padding: 3px 8px !important; font-size: 11px !important; }
-  .nav-btn { width: 26px !important; height: 26px !important; font-size: 15px !important; }
-
-  /* 날짜 열 너비 축소 */
-  .th-date { min-width: 288px !important; padding: 3px 2px !important; }
+  /* ── 핵심: td-events 폭 강제 ── */
+  .td-events {
+    min-width: 90px !important;
+    width: 90px !important;
+    min-height: 120px !important;
+    padding: 3px 2px !important;
+  }
+  .th-date { min-width: 270px !important; padding: 3px 2px !important; }
   .th-date .date-num { font-size: 12px !important; }
   .th-date .date-dow { font-size: 9px !important; }
 
-  /* 기사 이름 행 - 더 좁게 */
+  /* ── th-worker: sticky top 유지, 크기만 줄임 ── */
   .th-worker { padding: 2px 1px !important; }
   .th-worker .worker-name { font-size: 9px !important; gap: 2px !important; }
   .worker-dot { width: 5px !important; height: 5px !important; }
 
-  /* 이벤트 셀 */
-  .td-events { padding: 2px 3px !important; }
+  /* ── 이벤트 카드: 줄바꿈 완전 제거 ── */
+  .ev-item {
+    padding: 3px 4px !important;
+    margin-bottom: 2px !important;
+    overflow: hidden !important;
+  }
+  .ev-item .ev-type {
+    font-size: 8px !important;
+    padding: 0 3px !important;
+    white-space: nowrap !important;
+    margin-bottom: 1px !important;
+  }
+  .ev-item .ev-building {
+    display: block !important;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 82px !important;
+    line-height: 1.3 !important;
+  }
+  .ev-item .ev-time {
+    display: block !important;
+    font-size: 8px !important;
+    white-space: nowrap !important;
+    line-height: 1.3 !important;
+  }
+  .ev-item .ev-meta,
+  .ev-item .ev-phone {
+    display: block !important;
+    font-size: 8px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 82px !important;
+    letter-spacing: -0.3px !important;
+  }
+  .ev-item .ev-memo {
+    display: block !important;
+    font-size: 7px !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    max-width: 82px !important;
+  }
+  /* 체크박스 위치 */
+  .ev-cb-wrap { top: 3px !important; right: 2px !important; }
 
-  /* 이벤트 카드 - 핵심 개선 */
-  .ev-item { padding: 3px 5px !important; margin-bottom: 2px !important; border-radius: 3px !important; }
-  .ev-item .ev-type { font-size: 8px !important; padding: 0px 3px !important; margin-bottom: 1px !important; }
-  .ev-item .ev-building { font-size: 10px !important; line-height: 1.2 !important; }
-  .ev-item .ev-time { font-size: 8px !important; }
-  .ev-item .ev-phone { font-size: 8px !important; letter-spacing: -0.3px !important; }
-  .ev-item .ev-memo { font-size: 8px !important; margin-top: 1px !important; }
-  .ev-check { width: 14px !important; height: 14px !important; }
+  /* ── 헤더 ── */
+  header { height: 44px !important; padding: 0 8px !important; }
+  .logo { font-size: 12px !important; gap: 5px !important; }
+  .logo-icon { width: 22px !important; height: 22px !important; font-size: 11px !important; }
+  .btn-sm { padding: 4px 7px !important; font-size: 11px !important; }
 
-  /* 완료 체크 원 크기 */
-  .ev-check-wrap { right: 3px !important; top: 3px !important; }
+  /* ── 탭바 ── */
+  .tabs-wrap { padding: 0 6px !important; }
+  .tab-item { padding: 6px 8px !important; font-size: 11px !important; }
+
+  /* ── 통계바 ── */
+  .top-toolbar { padding: 3px 8px !important; min-height: 30px !important; }
+  .summary-chip { font-size: 10px !important; }
+
+  /* ── 캘린더 헤더 ── */
+  .cal-header { padding: 5px 10px !important; }
+  .cal-title { font-size: 12px !important; }
+  .week-badge { font-size: 10px !important; padding: 1px 5px !important; }
+  .view-btn { padding: 3px 8px !important; font-size: 11px !important; }
+  .nav-btn { width: 26px !important; height: 26px !important; }
 }
 </style>
-
-<script id="mobile-optimize-js">
+<script id="mobile-opt-js">
 (function(){
-  // 기사 이름 줄임 (이광희→광희) - 모바일에서만
-  function shortenWorkerNames(){
+  function shortenNames(){
     if(window.innerWidth > 640) return;
     document.querySelectorAll('.th-worker .worker-name').forEach(function(el){
       var dot = el.querySelector('.worker-dot');
@@ -3148,25 +3187,17 @@ function copyEvent(id) {
       el.childNodes.forEach(function(n){
         if(n.nodeType === 3){
           var t = n.textContent.trim();
-          if(t.length >= 3) n.textContent = t.slice(-2); // 이광희→광희
+          if(t.length >= 3) n.textContent = t.slice(-2);
         }
       });
     });
   }
-
-  // render 함수 후킹
   if(typeof render === 'function'){
-    var _origRender = render;
-    window.render = function(){
-      _origRender.apply(this, arguments);
-      setTimeout(shortenWorkerNames, 10);
-    };
+    var _r = render;
+    window.render = function(){ _r.apply(this, arguments); setTimeout(shortenNames, 10); };
   }
-
-  // 초기 실행 + 화면 크기 바뀔 때
-  shortenWorkerNames();
-  window.addEventListener('resize', shortenWorkerNames);
+  shortenNames();
+  window.addEventListener('resize', shortenNames);
 })();
 </script>
-
 </body></html>
