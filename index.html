@@ -118,7 +118,7 @@ table{width:100%;border-collapse:collapse;table-layout:auto}
 .worker-dot{width:6px;height:6px;border-radius:50%;display:inline-block}
 
 /* 일정 셀 */
-.td-events{border:1px solid var(--border);padding:4px;vertical-align:top;background:var(--surface);min-width:120px;min-height:200px;width:120px}
+.td-events{border:1px solid var(--border);padding:4px;vertical-align:top;background:var(--surface);min-width:120px;min-height:400px;width:120px}
 .td-events.today-col{background:#fafcff}
 .td-events:hover{background:var(--surface2)}
 
@@ -591,12 +591,6 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 .ev-item.done .ev-done-toggle { border-color: #22c55e; background: #22c55e; color: #fff; }
 .mobile-bottom-bar { display: none; }
 
-
-/* ══ 더보기 드롭다운 ══ */
-.more-menu-wrap{position:relative}
-.more-menu{position:absolute;top:calc(100% + 6px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:10px;box-shadow:0 8px 24px rgba(37,99,235,.13);padding:6px;min-width:150px;z-index:500}
-.more-menu-item{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border:none;background:none;border-radius:7px;font-size:12px;font-weight:500;color:var(--text);cursor:pointer;font-family:inherit;text-align:left;transition:background .12s}
-.more-menu-item:hover{background:var(--surface2)}
 </style>
 
 <script>
@@ -615,10 +609,6 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   if(!localStorage.getItem('fs-events')) localStorage.setItem('fs-events', '[]');
   if(!localStorage.getItem('fs-leaves')) localStorage.setItem('fs-leaves', '[]');
 })();
-
-function toggleMoreMenu(){const m=document.getElementById('more-menu');m.style.display=m.style.display==='none'?'block':'none'}
-document.addEventListener('click',function(e){const w=document.getElementById('more-menu-wrap');if(w&&!w.contains(e.target)){const m=document.getElementById('more-menu');if(m)m.style.display='none'}});
-
 </script>
 </head>
 <body>
@@ -646,15 +636,15 @@ document.addEventListener('click',function(e){const w=document.getElementById('m
   <div class="logo"><div class="logo-icon">📋</div>현장 일정 관리</div>
   <div class="header-right">
     <button class="btn btn-ghost btn-sm" onclick="doSearch()">🔍 검색</button>
-    <div class="more-menu-wrap" id="more-menu-wrap">
-      <button class="btn btn-ghost btn-sm" onclick="toggleMoreMenu()" id="more-menu-btn">⋮ 더보기</button>
-      <div class="more-menu" id="more-menu" style="display:none">
-        <button class="more-menu-item" onclick="openExcelModal();toggleMoreMenu()">📊 엑셀 업로드</button>
-        <button class="more-menu-item" onclick="enterSelMode();toggleMoreMenu()">☑ 선택 교체</button>
-        <button class="more-menu-item" onclick="openSwapModal();toggleMoreMenu()">🔄 전체 교체</button>
-        <button class="more-menu-item" onclick="openLeaveModal();toggleMoreMenu()">📅 연차/반차</button>
-        <button class="more-menu-item" onclick="openBackupModal();toggleMoreMenu()">💾 백업</button>
-        <button class="more-menu-item" onclick="openMasterModal();toggleMoreMenu()">⚙ 관리</button>
+    <div style="position:relative" id="more-wrap">
+      <button class="btn btn-ghost btn-sm" onclick="(function(){var m=document.getElementById('more-drop');m.style.display=m.style.display==='none'?'block':'none'})()">⋮ 더보기</button>
+      <div id="more-drop" style="display:none;position:absolute;top:calc(100% + 4px);right:0;background:var(--surface);border:1px solid var(--border2);border-radius:10px;padding:6px;min-width:150px;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.15)">
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:2px" onclick="openExcelModal();document.getElementById('more-drop').style.display='none'">📊 엑셀 업로드</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:2px" onclick="enterSelMode();document.getElementById('more-drop').style.display='none'">☑ 선택 교체</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:2px" onclick="openSwapModal();document.getElementById('more-drop').style.display='none'">🔄 전체 교체</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:2px" onclick="openLeaveModal();document.getElementById('more-drop').style.display='none'">📅 연차/반차</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start;margin-bottom:2px" onclick="openBackupModal();document.getElementById('more-drop').style.display='none'">💾 백업</button>
+        <button class="btn btn-ghost btn-sm" style="width:100%;justify-content:flex-start" onclick="openMasterModal();document.getElementById('more-drop').style.display='none'">⚙ 관리</button>
       </div>
     </div>
     <button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ 일정 추가</button>
@@ -3083,137 +3073,133 @@ function copyEvent(id) {
 
 
 
-
-
-
-
-
-<style id="mobile-opt">
-/* ══ iOS 키보드 대응: 로그인 화면 보안 ══ */
-#login-screen {
-  position: fixed !important;
-  inset: 0 !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 100vh !important;
-  background-color: #0f172a !important;
-  background: #0f172a !important;
-  z-index: 99999 !important;
-  overflow-y: auto !important;
-  -webkit-overflow-scrolling: touch !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-#login-screen.hidden { display: none !important; }
-
-@media (max-width: 640px) {
-
-  /* ── 캘린더 칸 ── */
-  .td-events {
-    min-width: 90px !important; width: 90px !important;
-    min-height: 80px !important; padding: 2px !important;
-    padding-top: 4px !important;
-  }
-  .th-date { min-width: 270px !important; padding: 3px 2px !important; }
-  .th-date .date-num { font-size: 12px !important; }
-  .th-date .date-dow { font-size: 9px !important; }
-  .th-date.today-col .date-num { width: 26px !important; height: 26px !important; }
-
-  /* ── 기사 이름 ── */
-  .th-worker { padding: 2px 0 !important; }
-  .th-worker .worker-name { font-size: 9px !important; gap: 2px !important; }
-  .worker-dot { width: 5px !important; height: 5px !important; }
-
-  /* ── 카드 ── */
-  .ev-item { padding: 3px 4px !important; margin-bottom: 2px !important; overflow: hidden !important; }
-
-  .ev-item .ev-type {
-    font-size: 8px !important; padding: 1px 4px !important;
-    white-space: nowrap !important; display: inline-block !important;
-    margin-bottom: 1px !important;
-  }
-
-  /* 건물명: 작은 폰트로 줄바꿈 허용 (잘리지 않게) */
-  .ev-item .ev-building {
-    display: block !important; font-size: 9px !important; font-weight: 700 !important;
-    white-space: normal !important; word-break: keep-all !important;
-    line-height: 1.3 !important; overflow: visible !important;
-  }
-
-  .ev-item .ev-time {
-    display: block !important; font-size: 8px !important;
-    white-space: nowrap !important; color: var(--text2) !important;
-  }
-
-  /* 전화+요금: 줄바꿈 허용으로 요금도 표시 */
-  .ev-item .ev-meta {
-    display: block !important; font-size: 8px !important;
-    white-space: normal !important; word-break: break-all !important;
-    line-height: 1.4 !important; color: var(--text3) !important;
-    letter-spacing: -0.3px !important;
-  }
-
-  /* 요금/메모 칩: 잘 보이게 */
-  .ev-item .ev-memo {
-    display: inline-block !important; font-size: 8px !important;
-    padding: 1px 5px !important; border-radius: 3px !important;
-    margin-top: 2px !important; max-width: 86px !important;
-    white-space: nowrap !important; overflow: hidden !important;
-    text-overflow: ellipsis !important; font-weight: 600 !important;
-  }
-
-  /* ── 헤더 ── */
-  header { height: 44px !important; padding: 0 8px !important; }
-  .logo { font-size: 12px !important; gap: 5px !important; }
-  .logo-icon { width: 22px !important; height: 22px !important; font-size: 11px !important; }
-  .btn-sm { padding: 4px 7px !important; font-size: 11px !important; }
-
-  /* ── 탭바 ── */
-  .tabs-wrap { padding: 0 6px !important; }
-  .tab-item { padding: 6px 8px !important; font-size: 11px !important; }
-
-  /* ── 통계바 ── */
-  .top-toolbar { padding: 3px 8px !important; min-height: 30px !important; }
-  .summary-chip { font-size: 10px !important; }
-
-  /* ── 캘린더 헤더 ── */
-  .cal-header { padding: 5px 10px !important; }
-  .cal-title { font-size: 12px !important; }
-  .week-badge { font-size: 10px !important; padding: 1px 5px !important; }
-  .view-btn { padding: 3px 8px !important; font-size: 11px !important; }
-  .nav-btn { width: 26px !important; height: 26px !important; }
-}
+<style id="ks-mobile-fix">
+/* 로그인 보안 */
+#login-screen { position:fixed!important; inset:0!important; width:100%!important; height:100%!important; background:#0f172a!important; z-index:99999!important; }
+/* 더보기 드롭다운 닫기 */
+.btn.btn-ghost.btn-sm { justify-content: center; display: inline-flex; align-items: center; }
 </style>
-<script id="mobile-opt-js">
+
+<script id="ks-mobile">
 (function(){
-  function shortenNames(){
-    if(window.innerWidth > 640) return;
+  var IS_MOBILE = window.innerWidth <= 640 || /Android|iPhone|iPad/i.test(navigator.userAgent);
+  
+  // 더보기 드롭다운 외부 클릭 닫기
+  document.addEventListener('click', function(e){
+    var wrap = document.getElementById('more-wrap');
+    var drop = document.getElementById('more-drop');
+    if(drop && wrap && !wrap.contains(e.target)) drop.style.display = 'none';
+  });
+
+  if(!IS_MOBILE) return;
+
+  // ── 모바일 전용 ──
+  var CELL_W = 88; // px - 각 기사 칸 너비
+
+  function applyMobileCSS(){
+    // 1. td-events: 폭/높이 직접 설정
+    document.querySelectorAll('.td-events').forEach(function(td){
+      td.style.setProperty('width', CELL_W+'px', 'important');
+      td.style.setProperty('min-width', CELL_W+'px', 'important');
+      td.style.setProperty('min-height', '60px', 'important');
+      td.style.setProperty('padding', '2px 2px', 'important');
+      td.style.setProperty('padding-top', '3px', 'important');
+      td.style.setProperty('overflow', 'visible', 'important');
+    });
+
+    // 2. th-date: 날짜 헤더 (3칸 span이므로 3*CELL_W)
+    document.querySelectorAll('.th-date').forEach(function(th){
+      th.style.setProperty('min-width', (CELL_W*3)+'px', 'important');
+    });
+
+    // 3. th-worker: 기사 이름 줄임
     document.querySelectorAll('.th-worker .worker-name').forEach(function(el){
+      el.style.setProperty('font-size', '9px', 'important');
       var dot = el.querySelector('.worker-dot');
-      if(!dot) return;
+      if(dot){ dot.style.width='5px'; dot.style.height='5px'; }
       el.childNodes.forEach(function(n){
-        if(n.nodeType === 3){ var t = n.textContent.trim(); if(t.length >= 3) n.textContent = t.slice(-2); }
+        if(n.nodeType===3){
+          var t=n.textContent.trim();
+          if(t.length>=3) n.textContent=t.slice(-2);
+        }
       });
     });
-  }
-  function scrollToToday(){
-    if(window.innerWidth > 640) return;
+
+    // 4. ev-item 카드 내용
+    document.querySelectorAll('.ev-item').forEach(function(item){
+      item.style.setProperty('padding', '3px 3px', 'important');
+      item.style.setProperty('margin-bottom', '2px', 'important');
+      item.style.setProperty('overflow', 'visible', 'important');
+    });
+
+    // ev-type 배지
+    document.querySelectorAll('.ev-item .ev-type').forEach(function(el){
+      el.style.setProperty('font-size', '8px', 'important');
+      el.style.setProperty('padding', '1px 3px', 'important');
+    });
+
+    // ev-building: 작게, 줄바꿈 허용
+    document.querySelectorAll('.ev-item .ev-building').forEach(function(el){
+      el.style.setProperty('font-size', '9px', 'important');
+      el.style.setProperty('font-weight', '700', 'important');
+      el.style.setProperty('white-space', 'normal', 'important');
+      el.style.setProperty('word-break', 'keep-all', 'important');
+      el.style.setProperty('line-height', '1.2', 'important');
+      el.style.setProperty('max-width', (CELL_W-6)+'px', 'important');
+    });
+
+    // ev-time
+    document.querySelectorAll('.ev-item .ev-time').forEach(function(el){
+      el.style.setProperty('font-size', '8px', 'important');
+    });
+
+    // ev-meta (전화번호): 줄바꿈 허용
+    document.querySelectorAll('.ev-item .ev-meta').forEach(function(el){
+      el.style.setProperty('font-size', '8px', 'important');
+      el.style.setProperty('white-space', 'normal', 'important');
+      el.style.setProperty('word-break', 'break-all', 'important');
+      el.style.setProperty('max-width', (CELL_W-6)+'px', 'important');
+      el.style.setProperty('overflow', 'visible', 'important');
+    });
+
+    // ev-memo (요금/특이사항): 반드시 보이게
+    document.querySelectorAll('.ev-item .ev-memo').forEach(function(el){
+      el.style.setProperty('display', 'inline-block', 'important');
+      el.style.setProperty('font-size', '8px', 'important');
+      el.style.setProperty('font-weight', '600', 'important');
+      el.style.setProperty('margin-top', '2px', 'important');
+      el.style.setProperty('max-width', (CELL_W-6)+'px', 'important');
+      el.style.setProperty('overflow', 'visible', 'important');
+      el.style.setProperty('white-space', 'nowrap', 'important');
+    });
+
+    // 5. 헤더 높이
+    var header = document.querySelector('header');
+    if(header){ header.style.setProperty('height','44px','important'); header.style.setProperty('padding','0 8px','important'); }
+    var logo = document.querySelector('.logo');
+    if(logo){ logo.style.setProperty('font-size','12px','important'); }
+
+    // 6. 오늘 컬럼으로 스크롤
     var wrap = document.getElementById('week-table-wrap');
-    if(!wrap) return;
     var todayTh = document.querySelector('.th-date.today-col');
-    if(!todayTh || !document.getElementById('week-table')) return;
-    var tRect = document.getElementById('week-table').getBoundingClientRect();
-    var dRect = todayTh.getBoundingClientRect();
-    var target = dRect.left - tRect.left - 8;
-    if(target > 0) wrap.scrollLeft = target;
+    var table = document.getElementById('week-table');
+    if(wrap && todayTh && table){
+      var tRect=table.getBoundingClientRect(), dRect=todayTh.getBoundingClientRect();
+      var target=dRect.left-tRect.left-8;
+      if(target>0) wrap.scrollLeft=target;
+    }
   }
-  if(typeof render === 'function'){
-    var _r = render;
-    window.render = function(){ _r.apply(this, arguments); setTimeout(function(){ shortenNames(); scrollToToday(); }, 30); };
+
+  // render 함수 후킹
+  if(typeof render==='function'){
+    var _r=render;
+    window.render=function(){ _r.apply(this,arguments); setTimeout(applyMobileCSS,50); };
   }
-  setTimeout(function(){ shortenNames(); scrollToToday(); }, 500);
-  window.addEventListener('resize', shortenNames);
+  
+  // 초기 실행
+  setTimeout(applyMobileCSS, 300);
+  setTimeout(applyMobileCSS, 800); // 재실행으로 확실히
+  window.addEventListener('resize', applyMobileCSS);
 })();
 </script>
 </body></html>
