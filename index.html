@@ -591,6 +591,37 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 .ev-item.done .ev-done-toggle { border-color: #22c55e; background: #22c55e; color: #fff; }
 .mobile-bottom-bar { display: none; }
 
+
+/* ══ 예약자 탭 접기/펼치기 ══ */
+.role-label {
+  cursor: pointer !important;
+  user-select: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 3px !important;
+  padding: 0 4px !important;
+  border-radius: 4px !important;
+  transition: background 0.15s !important;
+  font-weight: 700 !important;
+}
+.role-label:hover { background: var(--border2) !important; }
+.role-label::after {
+  content: '▾' !important;
+  font-size: 9px !important;
+  color: var(--text3) !important;
+  transition: transform 0.2s !important;
+}
+.role-booker.collapsed .role-label::after {
+  transform: rotate(-90deg) !important;
+}
+.role-booker.collapsed .staff-tab {
+  display: none !important;
+}
+/* 접혔을 때 예약자 라벨만 작게 표시 */
+.role-booker.collapsed {
+  gap: 0 !important;
+}
+
 </style>
 
 <script>
@@ -3207,6 +3238,53 @@ function copyEvent(id) {
   setTimeout(fix,400);
   setTimeout(fix,900);
   window.addEventListener('resize',fix);
+})();
+</script>
+<script id="ks-booker-collapse">
+(function(){
+  var STORE_KEY = 'booker_collapsed';
+
+  function applyCollapse(){
+    var booker = document.querySelector('.role-booker');
+    if(!booker) return;
+    var isCollapsed = localStorage.getItem(STORE_KEY) === 'true';
+    if(isCollapsed) booker.classList.add('collapsed');
+    else booker.classList.remove('collapsed');
+  }
+
+  function initToggle(){
+    var label = document.querySelector('.role-label');
+    if(!label || label._collapseInit) return;
+    label._collapseInit = true;
+    label.addEventListener('click', function(e){
+      e.stopPropagation();
+      var booker = document.querySelector('.role-booker');
+      if(!booker) return;
+      var nowCollapsed = !booker.classList.contains('collapsed');
+      if(nowCollapsed) booker.classList.add('collapsed');
+      else booker.classList.remove('collapsed');
+      localStorage.setItem(STORE_KEY, nowCollapsed ? 'true' : 'false');
+    });
+  }
+
+  // updateTabCounts 후킹 - 탭 재렌더 후에도 상태 유지
+  if(typeof updateTabCounts === 'function'){
+    var _orig = updateTabCounts;
+    window.updateTabCounts = function(){
+      _orig.apply(this, arguments);
+      setTimeout(function(){
+        initToggle();
+        applyCollapse();
+      }, 10);
+    };
+  }
+
+  // 초기 적용
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){ initToggle(); applyCollapse(); }, 300);
+    setTimeout(function(){ initToggle(); applyCollapse(); }, 800);
+  });
+  setTimeout(function(){ initToggle(); applyCollapse(); }, 500);
 })();
 </script>
 </body></html>
