@@ -3082,9 +3082,42 @@ function copyEvent(id) {
 
 
 <style id="ks-fix">
-#login-screen:not(.hidden)~.app{display:none!important;visibility:hidden!important}
-#login-screen{background:#0f172a!important;z-index:99999!important}
+/* 초기 앱 숨김 - JS가 로그인 상태 확인 후 보여줌 */
+.app { display: none !important; }
+#login-screen:not(.hidden) ~ .app { display: none !important; }
+#login-screen { background: #0f172a !important; z-index: 99999 !important; }
 </style>
+<script id="ks-login-observer">
+(function(){
+  function syncApp(){
+    var login = document.getElementById('login-screen');
+    var app = document.querySelector('.app');
+    if(!login || !app) return;
+    var isLoggedIn = login.classList.contains('hidden');
+    app.style.setProperty('display', isLoggedIn ? 'flex' : 'none', 'important');
+    app.style.setProperty('visibility', isLoggedIn ? 'visible' : 'hidden', 'important');
+  }
+
+  // MutationObserver: login-screen 클래스 변화 실시간 감지
+  function startObserver(){
+    var login = document.getElementById('login-screen');
+    if(!login) return;
+    var obs = new MutationObserver(syncApp);
+    obs.observe(login, { attributes: true, attributeFilter: ['class'] });
+    syncApp(); // 초기 실행
+  }
+
+  // DOMContentLoaded 또는 즉시 실행
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', startObserver);
+  } else {
+    startObserver();
+  }
+  // 추가 안전장치
+  setTimeout(syncApp, 100);
+  setTimeout(syncApp, 500);
+})();
+</script>
 <script id="ks-mobile">
 (function(){
   var MOBILE=window.innerWidth<=640||/Android|iPhone|iPad/i.test(navigator.userAgent);
