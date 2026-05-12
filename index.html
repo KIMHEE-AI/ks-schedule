@@ -592,24 +592,34 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 .mobile-bottom-bar { display: none; }
 
 
-/* ══ 예약자 탭 접기/펼치기 ══ */
+/* ══ 예약자 탭 접기/펼치기 - 전체기사와 동일 스타일 ══ */
 .role-label {
   cursor: pointer !important;
   user-select: none !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 3px !important;
-  padding: 0 4px !important;
-  border-radius: 4px !important;
+  gap: 4px !important;
+  /* 전체기사 stats-summary와 동일: padding/border/radius */
+  padding: 4px 10px !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 10px !important;
+  background: var(--surface) !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: var(--text) !important;
+  line-height: 1 !important;
+  white-space: nowrap !important;
   transition: background 0.15s !important;
-  font-weight: 700 !important;
+  min-height: 29px !important;
+  box-sizing: border-box !important;
 }
-.role-label:hover { background: var(--border2) !important; }
+.role-label:hover { background: var(--surface2) !important; }
 .role-label::after {
   content: '▾' !important;
-  font-size: 9px !important;
+  font-size: 10px !important;
   color: var(--text3) !important;
   transition: transform 0.2s !important;
+  display: inline-block !important;
 }
 .role-booker.collapsed .role-label::after {
   transform: rotate(-90deg) !important;
@@ -617,9 +627,16 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 .role-booker.collapsed .staff-tab {
   display: none !important;
 }
-/* 접혔을 때 예약자 라벨만 작게 표시 */
 .role-booker.collapsed {
   gap: 0 !important;
+}
+/* 헤더 버튼 높이 일치 */
+.header-right .btn-sm {
+  height: 28px !important;
+  min-height: 28px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  box-sizing: border-box !important;
 }
 
 </style>
