@@ -3089,15 +3089,15 @@ function copyEvent(id) {
 
 
 <style id="mobile-opt">
-/* ══ iOS 키보드 대응: 로그인화면이 뒤로 뚫리지 않게 ══ */
+/* ══ iOS 키보드 대응: 로그인 화면 보안 ══ */
 #login-screen {
   position: fixed !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
   min-height: 100vh !important;
-  background: var(--bg) !important;
-  background-color: #0f172a !important; /* fallback 불투명 색상 */
+  background-color: #0f172a !important;
+  background: #0f172a !important;
   z-index: 99999 !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
@@ -3109,12 +3109,10 @@ function copyEvent(id) {
 
 @media (max-width: 640px) {
 
-  /* ── td-events 폭/높이 ── */
+  /* ── 캘린더 칸 ── */
   .td-events {
-    min-width: 90px !important;
-    width: 90px !important;
-    min-height: 80px !important;
-    padding: 2px 2px !important;
+    min-width: 90px !important; width: 90px !important;
+    min-height: 80px !important; padding: 2px !important;
     padding-top: 4px !important;
   }
   .th-date { min-width: 270px !important; padding: 3px 2px !important; }
@@ -3127,61 +3125,42 @@ function copyEvent(id) {
   .th-worker .worker-name { font-size: 9px !important; gap: 2px !important; }
   .worker-dot { width: 5px !important; height: 5px !important; }
 
-  /* ── 이벤트 카드 ── */
+  /* ── 카드 ── */
   .ev-item { padding: 3px 4px !important; margin-bottom: 2px !important; overflow: hidden !important; }
 
   .ev-item .ev-type {
-    font-size: 8px !important;
-    padding: 1px 4px !important;
-    white-space: nowrap !important;
-    display: inline-block !important;
+    font-size: 8px !important; padding: 1px 4px !important;
+    white-space: nowrap !important; display: inline-block !important;
     margin-bottom: 1px !important;
   }
 
-  /* 건물명: 잘리지 않게 줄바꿈 허용, 폰트만 줄임 */
+  /* 건물명: 작은 폰트로 줄바꿈 허용 (잘리지 않게) */
   .ev-item .ev-building {
-    display: block !important;
-    font-size: 9px !important;
-    font-weight: 700 !important;
-    white-space: normal !important;
-    word-break: keep-all !important;
-    line-height: 1.3 !important;
-    max-width: 86px !important;
-    overflow: visible !important;
-    text-overflow: clip !important;
+    display: block !important; font-size: 9px !important; font-weight: 700 !important;
+    white-space: normal !important; word-break: keep-all !important;
+    line-height: 1.3 !important; overflow: visible !important;
   }
 
   .ev-item .ev-time {
-    display: block !important;
-    font-size: 8px !important;
-    white-space: nowrap !important;
-    color: var(--text2) !important;
+    display: block !important; font-size: 8px !important;
+    white-space: nowrap !important; color: var(--text2) !important;
   }
 
-  /* ev-meta: 요금+전화 모두 보이게 줄바꿈 허용 */
+  /* 전화+요금: 줄바꿈 허용으로 요금도 표시 */
   .ev-item .ev-meta {
-    display: block !important;
-    font-size: 8px !important;
-    white-space: normal !important;  /* 줄바꿈 허용 */
-    word-break: break-all !important;
-    line-height: 1.4 !important;
-    max-width: 86px !important;
-    overflow: visible !important;
+    display: block !important; font-size: 8px !important;
+    white-space: normal !important; word-break: break-all !important;
+    line-height: 1.4 !important; color: var(--text3) !important;
     letter-spacing: -0.3px !important;
-    color: var(--text3) !important;
   }
 
-  /* 메모 칩 */
+  /* 요금/메모 칩: 잘 보이게 */
   .ev-item .ev-memo {
-    display: inline-block !important;
-    font-size: 7px !important;
-    padding: 1px 4px !important;
-    border-radius: 3px !important;
-    margin-top: 2px !important;
-    max-width: 86px !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    display: inline-block !important; font-size: 8px !important;
+    padding: 1px 5px !important; border-radius: 3px !important;
+    margin-top: 2px !important; max-width: 86px !important;
+    white-space: nowrap !important; overflow: hidden !important;
+    text-overflow: ellipsis !important; font-weight: 600 !important;
   }
 
   /* ── 헤더 ── */
@@ -3214,10 +3193,7 @@ function copyEvent(id) {
       var dot = el.querySelector('.worker-dot');
       if(!dot) return;
       el.childNodes.forEach(function(n){
-        if(n.nodeType === 3){
-          var t = n.textContent.trim();
-          if(t.length >= 3) n.textContent = t.slice(-2);
-        }
+        if(n.nodeType === 3){ var t = n.textContent.trim(); if(t.length >= 3) n.textContent = t.slice(-2); }
       });
     });
   }
@@ -3226,13 +3202,11 @@ function copyEvent(id) {
     var wrap = document.getElementById('week-table-wrap');
     if(!wrap) return;
     var todayTh = document.querySelector('.th-date.today-col');
-    if(!todayTh) return;
-    var table = document.getElementById('week-table');
-    if(!table) return;
-    var tableRect = table.getBoundingClientRect();
-    var todayRect = todayTh.getBoundingClientRect();
-    var scrollTarget = todayRect.left - tableRect.left - 8;
-    if(scrollTarget > 0) wrap.scrollLeft = scrollTarget;
+    if(!todayTh || !document.getElementById('week-table')) return;
+    var tRect = document.getElementById('week-table').getBoundingClientRect();
+    var dRect = todayTh.getBoundingClientRect();
+    var target = dRect.left - tRect.left - 8;
+    if(target > 0) wrap.scrollLeft = target;
   }
   if(typeof render === 'function'){
     var _r = render;
