@@ -3077,40 +3077,37 @@ function copyEvent(id) {
 
 
 
+
+
 <style id="ks-fix">
-/* 로그인 화면 보안: hidden 아닐 때 뒤 콘텐츠 완전 숨김 */
-#login-screen:not(.hidden) ~ .app { display:none!important; visibility:hidden!important; }
-#login-screen { background:#0f172a!important; z-index:99999!important; }
-/* 모바일 세로형 헤더 버튼 처리 */
-@media(max-width:640px){
-  .header-right .btn.btn-ghost.btn-sm { padding:4px 7px!important; font-size:11px!important; }
-}
+#login-screen:not(.hidden)~.app{display:none!important;visibility:hidden!important}
+#login-screen{background:#0f172a!important;z-index:99999!important}
 </style>
 <script id="ks-mobile">
 (function(){
-  var MOBILE = window.innerWidth<=640 || /Android|iPhone|iPad/i.test(navigator.userAgent);
-  if(!MOBILE) return;
-
-  var W = 100; // 각 기사 칸 너비(px) - 충분히 넓게
-
+  var MOBILE=window.innerWidth<=640||/Android|iPhone|iPad/i.test(navigator.userAgent);
+  if(!MOBILE)return;
+  var W=100;
   function fix(){
-    // 칸 폭
+    // th-date: width + min-width 모두 설정 (핵심)
+    document.querySelectorAll('.th-date').forEach(function(th){
+      th.style.setProperty('width',(W*3)+'px','important');
+      th.style.setProperty('min-width',(W*3)+'px','important');
+    });
+    // td-events: width + min-width + max-width
     document.querySelectorAll('.td-events').forEach(function(td){
       td.style.setProperty('width',W+'px','important');
       td.style.setProperty('min-width',W+'px','important');
+      td.style.setProperty('max-width',W+'px','important');
       td.style.setProperty('min-height','60px','important');
       td.style.setProperty('padding','2px 3px','important');
       td.style.setProperty('overflow','visible','important');
     });
-    document.querySelectorAll('.th-date').forEach(function(th){
-      th.style.setProperty('min-width',(W*3)+'px','important');
-    });
-
-    // 기사이름 축약 + 크기
+    // 기사 이름 축약
     document.querySelectorAll('.th-worker').forEach(function(th){
       th.style.setProperty('padding','2px 0','important');
       var nm=th.querySelector('.worker-name');
-      if(!nm) return;
+      if(!nm)return;
       nm.style.setProperty('font-size','9px','important');
       var dot=nm.querySelector('.worker-dot');
       if(dot){dot.style.width='5px';dot.style.height='5px';}
@@ -3118,31 +3115,24 @@ function copyEvent(id) {
         if(n.nodeType===3){var t=n.textContent.trim();if(t.length>=3)n.textContent=t.slice(-2);}
       });
     });
-
-    // 카드 스타일
+    // 카드 내용 - 8px / nowrap / overflow visible
     document.querySelectorAll('.ev-item').forEach(function(item){
       item.style.setProperty('padding','3px 3px','important');
       item.style.setProperty('margin-bottom','2px','important');
       item.style.setProperty('overflow','visible','important');
     });
-    document.querySelectorAll('.ev-item .ev-type').forEach(function(el){
-      el.style.setProperty('font-size','8px','important');
-      el.style.setProperty('padding','1px 3px','important');
+    ['.ev-type','.ev-time'].forEach(function(sel){
+      document.querySelectorAll('.ev-item '+sel).forEach(function(el){
+        el.style.setProperty('font-size','8px','important');
+      });
     });
-    // 건물명: 8px nowrap - 100px 칸에서 대부분 한 줄 표시
     document.querySelectorAll('.ev-item .ev-building').forEach(function(el){
       el.style.setProperty('font-size','8px','important');
       el.style.setProperty('font-weight','700','important');
       el.style.setProperty('white-space','nowrap','important');
       el.style.setProperty('overflow','visible','important');
       el.style.setProperty('display','block','important');
-      el.style.setProperty('line-height','1.3','important');
     });
-    document.querySelectorAll('.ev-item .ev-time').forEach(function(el){
-      el.style.setProperty('font-size','8px','important');
-      el.style.setProperty('white-space','nowrap','important');
-    });
-    // 전화번호: 8px, 잘리지 않게
     document.querySelectorAll('.ev-item .ev-meta').forEach(function(el){
       el.style.setProperty('font-size','8px','important');
       el.style.setProperty('white-space','nowrap','important');
@@ -3150,42 +3140,29 @@ function copyEvent(id) {
       el.style.setProperty('display','block','important');
       el.style.setProperty('letter-spacing','-0.5px','important');
     });
-    // 요금/메모 칩: 잘 보이게
     document.querySelectorAll('.ev-item .ev-memo').forEach(function(el){
       el.style.setProperty('display','inline-block','important');
       el.style.setProperty('font-size','8px','important');
       el.style.setProperty('font-weight','600','important');
       el.style.setProperty('margin-top','2px','important');
       el.style.setProperty('overflow','visible','important');
-      el.style.setProperty('white-space','nowrap','important');
     });
-
     // 오늘 컬럼 스크롤
     var wrap=document.getElementById('week-table-wrap');
     var todayTh=document.querySelector('.th-date.today-col');
     var table=document.getElementById('week-table');
     if(wrap&&todayTh&&table){
-      var t=table.getBoundingClientRect(),d=todayTh.getBoundingClientRect();
-      var x=d.left-t.left-8;
-      if(x>0) wrap.scrollLeft=x;
+      var x=todayTh.getBoundingClientRect().left-table.getBoundingClientRect().left-8;
+      if(x>0)wrap.scrollLeft=x;
     }
   }
-
-  // render 후킹
-  function tryPatch(){
-    if(typeof render==='function'){
-      var _r=render;
-      window.render=function(){_r.apply(this,arguments);setTimeout(fix,60);};
-      return true;
-    }
-    return false;
-  }
-
-  if(!tryPatch()){
-    document.addEventListener('DOMContentLoaded',function(){tryPatch();setTimeout(fix,400);});
+  // render 패치
+  if(typeof render==='function'){
+    var _r=render;
+    window.render=function(){_r.apply(this,arguments);setTimeout(fix,60);};
   }
   setTimeout(fix,400);
-  setTimeout(fix,1000);
+  setTimeout(fix,900);
   window.addEventListener('resize',fix);
 })();
 </script>
