@@ -3090,23 +3090,28 @@ function copyEvent(id) {
 
 <style id="mobile-opt">
 @media (max-width: 640px) {
-  /* ── 핵심: td-events 폭 강제 ── */
+
+  /* ── 핵심: td-events 폭/높이 강제 ── */
   .td-events {
     min-width: 90px !important;
     width: 90px !important;
-    min-height: 120px !important;
+    min-height: 80px !important;
+    padding: 2px 2px !important;
+    padding-top: 6px !important;
+  }
+  .th-date {
+    min-width: 270px !important;
     padding: 3px 2px !important;
   }
-  .th-date { min-width: 270px !important; padding: 3px 2px !important; }
   .th-date .date-num { font-size: 12px !important; }
   .th-date .date-dow { font-size: 9px !important; }
 
-  /* ── th-worker: sticky top 유지, 크기만 줄임 ── */
-  .th-worker { padding: 2px 1px !important; }
+  /* ── 기사 이름 ── */
+  .th-worker { padding: 2px 0px !important; }
   .th-worker .worker-name { font-size: 9px !important; gap: 2px !important; }
   .worker-dot { width: 5px !important; height: 5px !important; }
 
-  /* ── 이벤트 카드: 줄바꿈 완전 제거 ── */
+  /* ── 이벤트 카드 ── */
   .ev-item {
     padding: 3px 4px !important;
     margin-bottom: 2px !important;
@@ -3114,8 +3119,10 @@ function copyEvent(id) {
   }
   .ev-item .ev-type {
     font-size: 8px !important;
-    padding: 0 3px !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
     white-space: nowrap !important;
+    display: inline-block !important;
     margin-bottom: 1px !important;
   }
   .ev-item .ev-building {
@@ -3125,14 +3132,16 @@ function copyEvent(id) {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 82px !important;
+    max-width: 84px !important;
     line-height: 1.3 !important;
+    color: var(--text) !important;
   }
   .ev-item .ev-time {
     display: block !important;
     font-size: 8px !important;
     white-space: nowrap !important;
-    line-height: 1.3 !important;
+    color: var(--text2) !important;
+    line-height: 1.4 !important;
   }
   .ev-item .ev-meta,
   .ev-item .ev-phone {
@@ -3141,19 +3150,22 @@ function copyEvent(id) {
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 82px !important;
+    max-width: 84px !important;
     letter-spacing: -0.3px !important;
+    line-height: 1.4 !important;
+    color: var(--text3) !important;
   }
   .ev-item .ev-memo {
-    display: block !important;
+    display: inline-block !important;
     font-size: 7px !important;
+    padding: 1px 4px !important;
+    border-radius: 3px !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
-    max-width: 82px !important;
+    max-width: 84px !important;
+    margin-top: 2px !important;
   }
-  /* 체크박스 위치 */
-  .ev-cb-wrap { top: 3px !important; right: 2px !important; }
 
   /* ── 헤더 ── */
   header { height: 44px !important; padding: 0 8px !important; }
@@ -3175,10 +3187,18 @@ function copyEvent(id) {
   .week-badge { font-size: 10px !important; padding: 1px 5px !important; }
   .view-btn { padding: 3px 8px !important; font-size: 11px !important; }
   .nav-btn { width: 26px !important; height: 26px !important; }
+
+  /* ── 날짜 오늘 표시 크기 ── */
+  .th-date.today-col .date-num {
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 12px !important;
+  }
 }
 </style>
 <script id="mobile-opt-js">
 (function(){
+  // 기사 이름 2글자 축약
   function shortenNames(){
     if(window.innerWidth > 640) return;
     document.querySelectorAll('.th-worker .worker-name').forEach(function(el){
@@ -3192,11 +3212,37 @@ function copyEvent(id) {
       });
     });
   }
+
+  // 오늘 컬럼으로 자동 스크롤
+  function scrollToToday(){
+    if(window.innerWidth > 640) return;
+    var wrap = document.getElementById('week-table-wrap');
+    if(!wrap) return;
+    var todayTh = document.querySelector('.th-date.today-col');
+    if(!todayTh) return;
+    var table = document.getElementById('week-table');
+    if(!table) return;
+    // 오늘 컬럼의 테이블 내 x 위치 계산
+    var tableRect = table.getBoundingClientRect();
+    var todayRect = todayTh.getBoundingClientRect();
+    var scrollTarget = todayRect.left - tableRect.left - 8;
+    if(scrollTarget > 0) wrap.scrollLeft = scrollTarget;
+  }
+
+  // render 함수 후킹
   if(typeof render === 'function'){
     var _r = render;
-    window.render = function(){ _r.apply(this, arguments); setTimeout(shortenNames, 10); };
+    window.render = function(){
+      _r.apply(this, arguments);
+      setTimeout(function(){ shortenNames(); scrollToToday(); }, 30);
+    };
   }
-  shortenNames();
+
+  // 초기 실행
+  document.addEventListener('DOMContentLoaded', function(){
+    setTimeout(function(){ shortenNames(); scrollToToday(); }, 300);
+  });
+  setTimeout(function(){ shortenNames(); scrollToToday(); }, 500);
   window.addEventListener('resize', shortenNames);
 })();
 </script>
