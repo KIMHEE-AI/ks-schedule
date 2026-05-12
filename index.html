@@ -3080,6 +3080,61 @@ function copyEvent(id) {
 .btn.btn-ghost.btn-sm { justify-content: center; display: inline-flex; align-items: center; }
 </style>
 
+<script id="ks-login-fix">
+(function(){
+  // login-screen 표시/숨김 시 .app도 같이 제어
+  var _origAdd = DOMTokenList.prototype.add;
+  var _origRemove = DOMTokenList.prototype.remove;
+  
+  function getApp(){ return document.querySelector('.app'); }
+  function getLogin(){ return document.getElementById('login-screen'); }
+  
+  DOMTokenList.prototype.add = function(){
+    _origAdd.apply(this, arguments);
+    var el = this._element || (this._ownerElement);
+    if(el && el.id === 'login-screen' && arguments[0] === 'hidden'){
+      // 로그인 성공 → 앱 보이기
+      var app = getApp();
+      if(app) app.style.display = 'flex';
+      document.body.style.overflow = '';
+    }
+  };
+  
+  DOMTokenList.prototype.remove = function(){
+    _origRemove.apply(this, arguments);
+    var el = this._ownerElement;
+    if(el && el.id === 'login-screen' && arguments[0] === 'hidden'){
+      // 로그인 화면 표시 → 앱 숨기기
+      var app = getApp();
+      if(app) app.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+    }
+  };
+  
+  // 초기 상태: 로그인 화면이 있으면 앱 숨기기
+  document.addEventListener('DOMContentLoaded', function(){
+    var login = getLogin();
+    var app = getApp();
+    if(login && app){
+      var isHidden = login.classList.contains('hidden');
+      app.style.display = isHidden ? 'flex' : 'none';
+      if(!isHidden) document.body.style.overflow = 'hidden';
+    }
+  });
+  
+  // 500ms 후 재확인
+  setTimeout(function(){
+    var login = getLogin();
+    var app = getApp();
+    if(!login || !app) return;
+    var isHidden = login.classList.contains('hidden');
+    if(!isHidden && app.style.display !== 'none'){
+      app.style.display = 'none';
+      document.body.style.overflow = 'hidden';
+    }
+  }, 500);
+})();
+</script>
 <script id="ks-mobile">
 (function(){
   var IS_MOBILE = window.innerWidth <= 640 || /Android|iPhone|iPad/i.test(navigator.userAgent);
