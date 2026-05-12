@@ -1520,7 +1520,7 @@ async function loadFromSupabase(){
         staff: r.staff || [], type: r.type,
         building: r.building, room: r.room,
         phone: r.phone, pw: r.pw, done: r.done || false,
-        service: r.service, memo: r.memo
+        service: r.service, memo: r.memo, fee: r.fee || ''
       }));
     }
 
@@ -1872,7 +1872,7 @@ function render(){
           <div class="ev-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
           ${ev.dispTime?`<div class="ev-time">${escHtml(ev.dispTime)}</div>`:''}
           ${ev.phone?`<div class="ev-meta">${escHtml(ev.phone)}</div>`:''}
-          ${ev.fee>0?`<div class="ev-fee" style="font-size:9px;color:#16a34a;font-weight:700;margin-top:2px">💰 ${Number(ev.fee).toLocaleString()}원</div>`:''}
+          ${(ev.fee && Number(ev.fee)>0)?`<div class="ev-fee" style="font-size:9px;color:#16a34a;font-weight:700;margin-top:2px">💰 ${Number(ev.fee).toLocaleString()}원</div>`:''}
           ${memo?`<div class="ev-memo">${memo}</div>`:''}
         `;
         div.onclick=selMode ? ()=>toggleSelCard(ev.id,div) : ()=>openEdit(ev.id);
