@@ -3007,7 +3007,7 @@ async function uploadToServer(){
         staff:ev.staff||[], type:ev.type||'기타',
         building:ev.building||'', room:ev.room||'',
         phone:ev.phone||'', pw:ev.pw||'',
-        service:ev.service||'', memo:ev.memo||''
+        service:ev.service||'', memo:ev.memo||'', fee:ev.fee||''
       }));
       const {error:e1} = await _supabase.from('events').upsert(rows,{onConflict:'id'});
       if(e1) throw e1;
