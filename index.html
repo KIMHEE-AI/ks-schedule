@@ -3138,9 +3138,13 @@ function copyEvent(id) {
       td.style.setProperty('padding','2px 3px','important');
       td.style.setProperty('overflow','visible','important');
     });
-    // 기사 이름 축약
+    // th-date 실제 높이 계산 후 th-worker sticky top 맞춤
+    var firstThDate = document.querySelector('.th-date');
+    var thDateH = firstThDate ? Math.ceil(firstThDate.getBoundingClientRect().height) : 40;
+    // 기사 이름 축약 + sticky top 조정
     document.querySelectorAll('.th-worker').forEach(function(th){
       th.style.setProperty('padding','2px 0','important');
+      th.style.setProperty('top', thDateH+'px', 'important');
       var nm=th.querySelector('.worker-name');
       if(!nm)return;
       nm.style.setProperty('font-size','9px','important');
@@ -3149,6 +3153,10 @@ function copyEvent(id) {
       nm.childNodes.forEach(function(n){
         if(n.nodeType===3){var t=n.textContent.trim();if(t.length>=3)n.textContent=t.slice(-2);}
       });
+    });
+    // td-events 상단 여백 추가 (첫 카드 잘림 방지)
+    document.querySelectorAll('.td-events').forEach(function(td){
+      td.style.setProperty('padding-top','4px','important');
     });
     // 카드 내용 - 8px / nowrap / overflow visible
     document.querySelectorAll('.ev-item').forEach(function(item){
