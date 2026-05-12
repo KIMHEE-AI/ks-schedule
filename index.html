@@ -927,6 +927,7 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
       <div class="f-row2">
         <div><label>고객 연락처</label><input type="text" id="f-phone" placeholder="010-0000-0000"></div>
         <div><label>비번</label><input type="text" id="f-pw" placeholder="1234, 전화하면비번"></div>
+        <div><label>요금 (원)</label><input type="number" id="f-fee" placeholder="예: 22000" min="0" step="100" style="width:100%"></div>
       </div>
       <div class="f-row">
         <div class="choice-head"><label>서비스 유형</label><button type="button" class="btn btn-ghost btn-sm" onclick="openMasterModal(&#39;services&#39;)">서비스 관리</button></div>
@@ -1871,6 +1872,7 @@ function render(){
           <div class="ev-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
           ${ev.dispTime?`<div class="ev-time">${escHtml(ev.dispTime)}</div>`:''}
           ${ev.phone?`<div class="ev-meta">${escHtml(ev.phone)}</div>`:''}
+          ${ev.fee>0?`<div class="ev-fee" style="font-size:9px;color:#16a34a;font-weight:700;margin-top:2px">💰 ${Number(ev.fee).toLocaleString()}원</div>`:''}
           ${memo?`<div class="ev-memo">${memo}</div>`:''}
         `;
         div.onclick=selMode ? ()=>toggleSelCard(ev.id,div) : ()=>openEdit(ev.id);
@@ -2328,7 +2330,7 @@ function saveEvent(){
   if(!selStaff.length){toast('담당자를 선택해주세요','err');return}
   if(!building){toast('건물명을 입력해주세요','err');return}
   if(!selType){toast('업무 유형을 선택해주세요','err');return}
-  const ev={id:editId||Date.now().toString(),date,dispTime:document.getElementById('f-disp-time').value.trim(),sortTime:document.getElementById('f-sort-time').value,staff:[...selStaff],type:selType,building,room,phone:document.getElementById('f-phone').value.trim(),pw:document.getElementById('f-pw').value.trim(),service:document.getElementById('f-service').value,memo:document.getElementById('f-memo').value.trim()};
+  const ev={id:editId||Date.now().toString(),date,dispTime:document.getElementById('f-disp-time').value.trim(),sortTime:document.getElementById('f-sort-time').value,staff:[...selStaff],type:selType,building,room,phone:document.getElementById('f-phone').value.trim(),pw:document.getElementById('f-pw').value.trim(),service:document.getElementById('f-service').value,memo:document.getElementById('f-memo').value.trim(), fee:parseInt(document.getElementById('f-fee')?.value)||0};
   if(editId){const idx=events.findIndex(e=>e.id===editId);if(idx!==-1)events[idx]=ev;toast('수정 완료 ✓')}
   else{events.push(ev);toast('일정 추가 ✓')}
   saveData();
