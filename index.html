@@ -3082,57 +3082,59 @@ function copyEvent(id) {
 
 <script id="ks-login-fix">
 (function(){
-  // login-screen 표시/숨김 시 .app도 같이 제어
-  var _origAdd = DOMTokenList.prototype.add;
-  var _origRemove = DOMTokenList.prototype.remove;
-  
-  function getApp(){ return document.querySelector('.app'); }
-  function getLogin(){ return document.getElementById('login-screen'); }
-  
-  DOMTokenList.prototype.add = function(){
-    _origAdd.apply(this, arguments);
-    var el = this._element || (this._ownerElement);
-    if(el && el.id === 'login-screen' && arguments[0] === 'hidden'){
-      // 로그인 성공 → 앱 보이기
-      var app = getApp();
-      if(app) app.style.display = 'flex';
-      document.body.style.overflow = '';
+  // .app과 로그인화면 상태 동기화 헬퍼
+  function syncAppVisibility(){
+    var login = document.getElementById('login-screen');
+    var app = document.querySelector('.app');
+    if(!login || !app) return;
+    var loginVisible = !login.classList.contains('hidden') && login.style.display !== 'none';
+    app.style.setProperty('display', loginVisible ? 'none' : 'flex', 'important');
+    app.style.setProperty('visibility', loginVisible ? 'hidden' : 'visible', 'important');
+    document.body.style.overflow = loginVisible ? 'hidden' : '';
+  }
+
+  // checkSession, doLogin, doLogout 패치
+  window.addEventListener('load', function(){
+    // checkSession 패치
+    if(typeof checkSession === 'function'){
+      var _cs = checkSession;
+      window.checkSession = async function(){
+        await _cs.apply(this, arguments);
+        setTimeout(syncAppVisibility, 100);
+      };
     }
-  };
-  
-  DOMTokenList.prototype.remove = function(){
-    _origRemove.apply(this, arguments);
-    var el = this._ownerElement;
-    if(el && el.id === 'login-screen' && arguments[0] === 'hidden'){
-      // 로그인 화면 표시 → 앱 숨기기
-      var app = getApp();
-      if(app) app.style.display = 'none';
-      document.body.style.overflow = 'hidden';
+    // doLogin 패치
+    if(typeof doLogin === 'function'){
+      var _dl = doLogin;
+      window.doLogin = async function(){
+        await _dl.apply(this, arguments);
+        setTimeout(syncAppVisibility, 100);
+      };
     }
-  };
-  
-  // 초기 상태: 로그인 화면이 있으면 앱 숨기기
+    // doLogout 패치
+    if(typeof doLogout === 'function'){
+      var _dlo = doLogout;
+      window.doLogout = function(){
+        _dlo.apply(this, arguments);
+        setTimeout(syncAppVisibility, 100);
+      };
+    }
+    // 초기 실행
+    syncAppVisibility();
+  });
+
+  // DOMContentLoaded에서도 실행
   document.addEventListener('DOMContentLoaded', function(){
-    var login = getLogin();
-    var app = getApp();
-    if(login && app){
-      var isHidden = login.classList.contains('hidden');
-      app.style.display = isHidden ? 'flex' : 'none';
-      if(!isHidden) document.body.style.overflow = 'hidden';
-    }
+    setTimeout(syncAppVisibility, 200);
+    setTimeout(syncAppVisibility, 600);
   });
   
-  // 500ms 후 재확인
-  setTimeout(function(){
-    var login = getLogin();
-    var app = getApp();
-    if(!login || !app) return;
-    var isHidden = login.classList.contains('hidden');
-    if(!isHidden && app.style.display !== 'none'){
-      app.style.display = 'none';
-      document.body.style.overflow = 'hidden';
-    }
-  }, 500);
+  // 주기적 체크 (1초마다, 처음 10초)
+  var checkCount = 0;
+  var interval = setInterval(function(){
+    syncAppVisibility();
+    if(++checkCount >= 10) clearInterval(interval);
+  }, 1000);
 })();
 </script>
 <script id="ks-mobile">
