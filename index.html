@@ -3154,31 +3154,68 @@ function copyEvent(id) {
 </style>
 <script id="ks-login-observer">
 (function(){
-  function syncApp(){
+  function lockBody() {
+    // 키보드가 올라와도 뒤 내용이 안 보이게 body 완전 고정
+    document.body.style.setProperty('overflow', 'hidden', 'important');
+    document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+    document.body.style.setProperty('position', 'fixed', 'important');
+    document.body.style.setProperty('width', '100%', 'important');
+    document.body.style.setProperty('height', '100%', 'important');
+  }
+  function unlockBody() {
+    document.body.style.removeProperty('overflow');
+    document.documentElement.style.removeProperty('overflow');
+    document.body.style.removeProperty('position');
+    document.body.style.removeProperty('width');
+    document.body.style.removeProperty('height');
+  }
+
+  function syncApp() {
     var login = document.getElementById('login-screen');
     var app = document.querySelector('.app');
-    if(!login || !app) return;
+    if (!login || !app) return;
     var isLoggedIn = login.classList.contains('hidden');
-    app.style.setProperty('display', isLoggedIn ? 'flex' : 'none', 'important');
-    app.style.setProperty('visibility', isLoggedIn ? 'visible' : 'hidden', 'important');
+    if (isLoggedIn) {
+      // 로그인 상태 - 앱 보여줌, body 잠금 해제
+      app.style.setProperty('display', 'flex', 'important');
+      app.style.setProperty('visibility', 'visible', 'important');
+      unlockBody();
+    } else {
+      // 로그인 안된 상태 - 앱 완전히 숨김, body 잠금
+      app.style.setProperty('display', 'none', 'important');
+      app.style.setProperty('visibility', 'hidden', 'important');
+      lockBody();
+    }
   }
 
-  // MutationObserver: login-screen 클래스 변화 실시간 감지
-  function startObserver(){
+  // MutationObserver로 login-screen 클래스 변화 감지
+  function startObserver() {
     var login = document.getElementById('login-screen');
-    if(!login) return;
-    var obs = new MutationObserver(syncApp);
-    obs.observe(login, { attributes: true, attributeFilter: ['class'] });
-    syncApp(); // 초기 실행
+    if (!login) return;
+    new MutationObserver(syncApp).observe(login, { attributes: true, attributeFilter: ['class'] });
+    syncApp();
   }
 
-  // DOMContentLoaded 또는 즉시 실행
-  if(document.readyState === 'loading'){
+  // 입력 포커스 시 body 잠금 재확인 (키보드 대응)
+  document.addEventListener('focusin', function(e) {
+    var login = document.getElementById('login-screen');
+    if (login && !login.classList.contains('hidden')) {
+      lockBody();
+      // 앱 다시 숨기기
+      var app = document.querySelector('.app');
+      if (app) {
+        app.style.setProperty('display', 'none', 'important');
+        app.style.setProperty('visibility', 'hidden', 'important');
+      }
+    }
+  });
+
+  // 초기 실행
+  if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', startObserver);
   } else {
     startObserver();
   }
-  // 추가 안전장치
   setTimeout(syncApp, 100);
   setTimeout(syncApp, 500);
 })();
