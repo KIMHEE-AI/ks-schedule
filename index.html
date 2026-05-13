@@ -59,9 +59,9 @@ header{background:var(--surface);border-bottom:1px solid var(--border);padding:0
 .tabs-wrap{background:var(--surface);border-bottom:2px solid var(--border);padding:0 16px}
 .tabs-role{display:flex;align-items:stretch;overflow-x:auto}
 .tabs-role::-webkit-scrollbar{height:0}
-.role-group{display:flex;align-items:stretch;position:relative}
+.role-group{display:flex;align-items:center;position:relative}
 .role-group+.role-group{border-left:2px solid var(--border2);padding-left:4px;margin-left:4px}
-.role-label{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px 0;color:var(--text3);position:absolute;top:0;left:8px;white-space:nowrap}
+.role-label{font-size:9px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 8px 0;color:var(--text3);position:absolute;top:50%;left:8px;white-space:nowrap;transform:translateY(-50%)}
 .staff-tab{padding:26px 12px 7px;font-size:12px;font-weight:700;cursor:pointer;border:none;background:transparent;color:var(--text3);border-bottom:3px solid transparent;transition:all .14s;display:flex;align-items:center;gap:5px;font-family:inherit}
 .staff-tab:hover{color:var(--text2);background:var(--surface2)}
 .staff-tab.active{color:var(--text);border-bottom-color:var(--tab-color,#2563eb)}
@@ -600,6 +600,8 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   align-items: center !important;
   gap: 4px !important;
   /* 전체기사 stats-summary와 동일: padding/border/radius */
+  top: 50% !important;
+  transform: translateY(-50%) !important;
   padding: 4px 10px !important;
   border: 1px solid var(--border2) !important;
   border-radius: 10px !important;
@@ -637,6 +639,21 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   display: inline-flex !important;
   align-items: center !important;
   box-sizing: border-box !important;
+}
+
+
+/* 예약자 수직 중앙 정렬 */
+.tabs-role { align-items: center !important; }
+
+/* 더보기 래퍼 정렬 */
+#more-wrap {
+  display: inline-flex !important;
+  align-items: center !important;
+  height: 28px !important;
+}
+#more-wrap > button {
+  height: 28px !important;
+  line-height: 1 !important;
 }
 
 </style>
