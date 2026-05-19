@@ -3746,18 +3746,22 @@ function copyEvent(id) {
       }).join('');
   }
 
-  // ─ 초기화: 설치+수거가 없으면 추가 ─
+  // ─ 초기화: 설치+수거가 없으면 추가 + 모달 목록도 갱신 ─
   function init(){
     var master;
     try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
     if(!master.types) master.types = ['설치','수거','AS','이전','기타'];
+    var changed = false;
     if(!master.types.includes('설치+수거')){
       var gi = master.types.indexOf('기타');
       if(gi > -1) master.types.splice(gi, 0, '설치+수거');
       else master.types.push('설치+수거');
       localStorage['fs-master'] = JSON.stringify(master);
+      changed = true;
     }
     syncTypeFilter();
+    // 관리 모달이 열려있으면 목록도 갱신
+    if(typeof renderMasterList === 'function') renderMasterList();
   }
 
   // ─ switchMasterTab 패치: 현재 탭 추적 ─
