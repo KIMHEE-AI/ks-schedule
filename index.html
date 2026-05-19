@@ -3759,17 +3759,33 @@ function copyEvent(id) {
       localStorage['fs-master'] = JSON.stringify(master);
       changed = true;
     }
+    // in-memory master 재로드 → 필터 + 모달 갱신
+    if(typeof loadMaster === 'function') loadMaster();
     syncTypeFilter();
-    // 관리 모달이 열려있으면 목록도 갱신
-    if(typeof renderMasterList === 'function') renderMasterList();
+    renderTypesFromStorage();
   }
 
-  // ─ switchMasterTab 패치: 현재 탭 추적 ─
+  // ─ 유형 탭 DOM 직접 렌더링 ─
+  function renderTypesFromStorage(){
+    var masterList = document.getElementById('master-list');
+    if(!masterList) return;
+    var types;
+    try { types = JSON.parse(localStorage['fs-master']||'{}').types||[]; } catch(e){ return; }
+    masterList.innerHTML = types.map(function(t,i){
+      return '<div class="master-item"><div class="master-name">'+t+'</div>' +
+        '<div class="master-actions"><button onclick="editMasterItem('+i+')">수정</button>' +
+        '<button onclick="deleteMasterItem('+i+')">삭제</button></div></div>';
+    }).join('');
+  }
+
+  // ─ switchMasterTab 패치: 현재 탭 추적 + 유형 탭 시 직접 렌더 ─
   if(typeof switchMasterTab === 'function'){
     var _st = switchMasterTab;
     window.switchMasterTab = function(tab, el){
       _curMasterTab = tab;
-      return _st.apply(this, arguments);
+      var result = _st.apply(this, arguments);
+      if(tab === 'types') setTimeout(renderTypesFromStorage, 50);
+      return result;
     };
   }
 
