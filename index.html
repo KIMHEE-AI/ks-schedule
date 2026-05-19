@@ -658,18 +658,22 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
 
 
 /* 전화 링크 스타일 */
-.ev-meta a[href^="tel"] {
-  display: block;
-  cursor: pointer;
+.tel-link {
+  display: inline-block;
+  color: #2563eb !important;
+  font-weight: 600 !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  padding: 2px 6px !important;
+  border-radius: 6px !important;
+  background: rgba(37,99,235,0.08) !important;
+  margin-top: 2px !important;
+  font-size: inherit !important;
+  transition: background 0.15s !important;
 }
-@media (hover: hover) {
-  .ev-meta a[href^="tel"]:hover {
-    text-decoration: underline !important;
-    opacity: 0.8;
-  }
-}
-.ev-meta a[href^="tel"]:active {
-  opacity: 0.6;
+.tel-link:active, .tel-link:hover {
+  background: rgba(37,99,235,0.18) !important;
+  text-decoration: underline !important;
 }
 
 </style>
@@ -1952,7 +1956,7 @@ function render(){
           <span class="ev-type" style="background:${isDone?'#e2e8f0':''+ts.bg};color:${isDone?'#64748b':''+ts.c}">${ev.type}</span>
           <div class="ev-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
           ${ev.dispTime?`<div class="ev-time">${escHtml(ev.dispTime)}</div>`:''}
-          ${ev.phone?`<div class="ev-meta"><a href="tel:${ev.phone}" style="color:inherit;text-decoration:none;display:block">${escHtml(ev.phone)}</a></div>`:''}
+          ${ev.phone?`<div class="ev-meta"><a href="tel:${ev.phone}" class="tel-link" onclick="event.stopPropagation()">📞 ${escHtml(ev.phone)}</a></div>`:''}
           ${(ev.fee && Number(ev.fee)>0)?`<div class="ev-fee" style="font-size:9px;color:#16a34a;font-weight:700;margin-top:2px">💰 ${Number(ev.fee).toLocaleString()}원</div>`:''}
           ${memo?`<div class="ev-memo">${memo}</div>`:''}
         `;
@@ -2029,7 +2033,7 @@ function renderListView(filtered,days){
         <div><span class="res-type" style="background:${ts.bg};color:${ts.c}">${ev.type||'기타'}</span></div>
         <div class="res-main">
           <div class="res-building">${escHtml(ev.building||'')} ${escHtml(ev.room||'')}</div>
-          <div class="res-sub">${ev.phone?`<a href="tel:${ev.phone}" style="color:inherit;text-decoration:none">${escHtml(ev.phone)}</a>`:''}${ev.service?` · ${escHtml(ev.service)}`:''}</div>
+          <div class="res-sub">${ev.phone?`<a href="tel:${ev.phone}" class="tel-link" onclick="event.stopPropagation()">📞 ${escHtml(ev.phone)}</a>`:''}${ev.service?` · ${escHtml(ev.service)}`:''}</div>
           ${memo?`<div class="res-memo">${memo}</div>`:''}
         </div>
         <div class="res-worker">기사: ${workers||'-'}</div>
