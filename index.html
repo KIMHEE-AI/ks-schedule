@@ -3814,4 +3814,74 @@ function copyEvent(id) {
   },500);
 })();
 </script>
+<script id="ks-type-sync">
+(function(){
+  // tf-btn 필터를 master.types에서 동적으로 재생성
+  function syncTypeFilter(){
+    var master;
+    try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
+    var types = master.types || [];
+    var container = document.getElementById('type-filter-top');
+    if(!container) return;
+
+    // 현재 선택된 유형 기억
+    var activeBtn = container.querySelector('.tf-btn.active');
+    var activeType = activeBtn ? activeBtn.textContent.trim() : '전체';
+
+    // 버튼 재생성
+    var btns = [
+      '<button class="tf-btn' + (activeType==='전체' ? ' active':'') + '" onclick="switchType('전체',this)">전체</button>'
+    ];
+    types.forEach(function(t){
+      var isActive = (t === activeType) ? ' active' : '';
+      btns.push('<button class="tf-btn'+isActive+'" onclick="switchType(''+t+'',this)">'+t+'</button>');
+    });
+
+    container.innerHTML = btns.join('');
+  }
+
+  // addNewType / deleteType 패치해서 필터도 동기화
+  var _addOrig = window.addNewType;
+  if(typeof _addOrig === 'function'){
+    window.addNewType = function(){
+      _addOrig.apply(this, arguments);
+      setTimeout(syncTypeFilter, 100);
+    };
+  }
+  var _delOrig = window.deleteType;
+  if(typeof _delOrig === 'function'){
+    window.deleteType = function(){
+      _delOrig.apply(this, arguments);
+      setTimeout(syncTypeFilter, 100);
+    };
+  }
+
+  // 페이지 로드 시 초기 동기화
+  function init(){
+    // master.types에 "설치+수거"가 없으면 추가
+    var master;
+    try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
+    if(!master.types) master.types = ['설치','수거','AS','이전','기타'];
+    if(!master.types.includes('설치+수거')){
+      var gitaIdx = master.types.indexOf('기타');
+      if(gitaIdx > -1) master.types.splice(gitaIdx, 0, '설치+수거');
+      else master.types.push('설치+수거');
+      localStorage['fs-master'] = JSON.stringify(master);
+    }
+    syncTypeFilter();
+  }
+
+  setTimeout(init, 400);
+  setTimeout(syncTypeFilter, 800);
+
+  // render 후에도 동기화
+  if(typeof render === 'function'){
+    var _r = render;
+    window.render = function(){
+      _r.apply(this, arguments);
+      setTimeout(syncTypeFilter, 50);
+    };
+  }
+})();
+</script>
 </body></html>
