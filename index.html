@@ -3407,4 +3407,58 @@ function copyEvent(id) {
   setTimeout(function(){ initToggle(); applyCollapse(); }, 500);
 })();
 </script>
+<script id="ks-done-sync">
+(function(){
+  function applyDoneClasses(){
+    var events;
+    try { events = JSON.parse(localStorage['fs-events'] || '[]'); } catch(e) { return; }
+    var doneIds = {};
+    events.forEach(function(ev){ if(ev.done) doneIds[ev.id] = true; });
+
+    document.querySelectorAll('.ev-item').forEach(function(item){
+      // ev-done-toggle의 onclick에서 id 추출
+      var btn = item.querySelector('.ev-done-toggle');
+      if(!btn) return;
+      var onclick = btn.getAttribute('onclick') || '';
+      var match = onclick.match(/toggleDone\('([^']+)'\)/);
+      if(!match) return;
+      var id = match[1];
+      if(doneIds[id]) {
+        item.classList.add('done');
+        btn.innerHTML = '✓';
+        btn.style.setProperty('background','#22c55e','important');
+        btn.style.setProperty('border-color','#22c55e','important');
+        btn.style.setProperty('color','#fff','important');
+      } else {
+        item.classList.remove('done');
+        btn.innerHTML = '';
+        btn.style.removeProperty('background');
+        btn.style.removeProperty('border-color');
+        btn.style.removeProperty('color');
+      }
+    });
+  }
+
+  // render 패치
+  if(typeof render === 'function'){
+    var _r = render;
+    window.render = function(){
+      _r.apply(this, arguments);
+      setTimeout(applyDoneClasses, 30);
+    };
+  }
+
+  // toggleDone 패치 - 즉시 시각 반영
+  if(typeof toggleDone === 'function'){
+    var _td = toggleDone;
+    window.toggleDone = function(id){
+      _td.apply(this, arguments);
+      setTimeout(applyDoneClasses, 50);
+    };
+  }
+
+  setTimeout(applyDoneClasses, 500);
+  setTimeout(applyDoneClasses, 1000);
+})();
+</script>
 </body></html>
