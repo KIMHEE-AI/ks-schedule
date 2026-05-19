@@ -3461,4 +3461,135 @@ function copyEvent(id) {
   setTimeout(applyDoneClasses, 1000);
 })();
 </script>
+<script id="ks-notify">
+(function(){
+  var STORE_KEY = 'ks_last_events_hash';
+  var notifyPermission = false;
+
+  // 1. 로그인 후 알림 권한 요청
+  function requestNotifyPermission(){
+    if(!('Notification' in window)) return;
+    if(Notification.permission === 'granted'){
+      notifyPermission = true;
+    } else if(Notification.permission !== 'denied'){
+      Notification.requestPermission().then(function(p){
+        notifyPermission = (p === 'granted');
+      });
+    }
+  }
+
+  // 2. 이벤트 목록 해시 생성 (변경 감지용)
+  function makeHash(events){
+    return events.map(function(ev){
+      return ev.id + '|' + ev.building + '|' + ev.room + '|' + ev.date + '|' + ev.staff + '|' + (ev.done?'1':'0');
+    }).sort().join(';');
+  }
+
+  // 3. 변경 감지 및 알림 발송
+  function checkChanges(){
+    var events;
+    try { events = JSON.parse(localStorage['fs-events'] || '[]'); } catch(e){ return; }
+    var newHash = makeHash(events);
+    var oldHash = localStorage[STORE_KEY] || '';
+
+    if(oldHash && oldHash !== newHash){
+      // 변경된 항목 찾기
+      var oldMap = {};
+      if(oldHash){
+        // 이전 상태를 localStorage에 따로 저장
+        try {
+          var oldEvs = JSON.parse(localStorage['ks_last_events_data'] || '[]');
+          oldEvs.forEach(function(ev){ oldMap[ev.id] = ev; });
+        } catch(e){}
+      }
+
+      var newEvents = [];
+      var changedEvents = [];
+      events.forEach(function(ev){
+        if(!oldMap[ev.id]){
+          newEvents.push(ev);
+        } else {
+          var old = oldMap[ev.id];
+          if(old.building !== ev.building || old.room !== ev.room ||
+             old.date !== ev.date || old.staff + '' !== ev.staff + ''){
+            changedEvents.push(ev);
+          }
+        }
+      });
+
+      // 새 일정 알림
+      newEvents.forEach(function(ev){
+        sendNotify(
+          '📋 새 일정 추가',
+          ev.building + ' ' + ev.room + ' (' + (Array.isArray(ev.staff) ? ev.staff.join(',') : ev.staff) + ') ' + ev.date
+        );
+      });
+
+      // 변경 알림
+      changedEvents.forEach(function(ev){
+        sendNotify(
+          '✏️ 일정 변경',
+          ev.building + ' ' + ev.room + ' (' + (Array.isArray(ev.staff) ? ev.staff.join(',') : ev.staff) + ')'
+        );
+      });
+
+      // toast도 표시
+      if(newEvents.length > 0 && typeof toast === 'function'){
+        toast('📋 새 일정 ' + newEvents.length + '건 추가됨');
+      }
+      if(changedEvents.length > 0 && typeof toast === 'function'){
+        toast('✏️ 일정 ' + changedEvents.length + '건 변경됨');
+      }
+    }
+
+    // 현재 상태 저장
+    localStorage[STORE_KEY] = newHash;
+    localStorage['ks_last_events_data'] = JSON.stringify(events);
+  }
+
+  // 4. 브라우저 알림 발송
+  function sendNotify(title, body){
+    if(notifyPermission && Notification.permission === 'granted'){
+      try {
+        new Notification(title, {
+          body: body,
+          icon: '/ks-schedule/favicon.ico',
+          badge: '/ks-schedule/favicon.ico',
+          tag: 'ks-schedule-' + Date.now(),
+          requireInteraction: false,
+          silent: false
+        });
+      } catch(e){}
+    }
+  }
+
+  // 5. loadFromSupabase 후킹 - 데이터 갱신 시마다 변경 감지
+  if(typeof loadFromSupabase === 'function'){
+    var _orig = loadFromSupabase;
+    window.loadFromSupabase = async function(){
+      await _orig.apply(this, arguments);
+      setTimeout(checkChanges, 200);
+    };
+  }
+
+  // 6. 로그인 후 권한 요청
+  var login = document.getElementById('login-screen');
+  if(login){
+    new MutationObserver(function(mutations){
+      mutations.forEach(function(m){
+        if(login.classList.contains('hidden')){
+          setTimeout(requestNotifyPermission, 1000);
+          // 초기 스냅샷 저장
+          setTimeout(function(){
+            var events;
+            try { events = JSON.parse(localStorage['fs-events']||'[]'); } catch(e){ return; }
+            localStorage[STORE_KEY] = makeHash(events);
+            localStorage['ks_last_events_data'] = JSON.stringify(events);
+          }, 2000);
+        }
+      });
+    }).observe(login, { attributes: true, attributeFilter: ['class'] });
+  }
+})();
+</script>
 </body></html>
