@@ -3724,157 +3724,72 @@ function copyEvent(id) {
   }
 })();
 </script>
-<script id="ks-type-manager">
-(function(){
-  // 유형 관리 UI 추가 - 관리 모달에 삽입
-  function addTypeManagerUI(){
-    var modal = document.getElementById('master-modal') ||
-                document.querySelector('[id*="master"]') ||
-                document.querySelector('.modal-overlay');
-    if(!modal || modal._typeManagerAdded) return;
 
-    // 유형 관리 섹션 생성
-    var section = document.createElement('div');
-    section.id = 'type-manager-section';
-    section.style.cssText = 'margin-top:16px;padding:16px;background:var(--surface2);border-radius:12px;border:1px solid var(--border2)';
-    section.innerHTML = `
-      <div style="font-weight:700;font-size:14px;margin-bottom:12px;display:flex;align-items:center;gap:6px">
-        🏷️ 업무 유형 관리
-      </div>
-      <div id="type-list" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px">
-        <input id="type-new-input" type="text" placeholder="새 유형 입력 (예: 이전설치)"
-          style="flex:1;padding:8px 12px;border:1px solid var(--border2);border-radius:8px;font-size:14px;background:var(--surface)">
-        <button onclick="addNewType()" style="padding:8px 14px;background:var(--primary);color:#fff;border:none;border-radius:8px;font-size:13px;cursor:pointer;font-weight:600">추가</button>
-      </div>
-    `;
-    modal.appendChild(section);
-    modal._typeManagerAdded = true;
-    renderTypeList();
-  }
 
-  function renderTypeList(){
-    var list = document.getElementById('type-list');
-    if(!list) return;
-    var master = JSON.parse(localStorage['fs-master']||'{}');
-    var types = master.types || [];
-    list.innerHTML = types.map(function(t,i){
-      return '<span style="display:inline-flex;align-items:center;gap:4px;padding:5px 10px;background:var(--surface);border:1px solid var(--border2);border-radius:20px;font-size:13px">' +
-        t +
-        '<button onclick="deleteType('+i+')" style="background:none;border:none;cursor:pointer;color:var(--text3);font-size:12px;padding:0;line-height:1;margin-left:2px">✕</button>' +
-        '</span>';
-    }).join('');
-  }
-
-  window.addNewType = function(){
-    var input = document.getElementById('type-new-input');
-    var val = (input?.value||'').trim();
-    if(!val){ alert('유형명을 입력해주세요'); return; }
-    var master = JSON.parse(localStorage['fs-master']||'{}');
-    master.types = master.types || [];
-    if(master.types.includes(val)){ alert('이미 있는 유형입니다'); return; }
-    master.types.push(val);
-    localStorage['fs-master'] = JSON.stringify(master);
-    input.value = '';
-    renderTypeList();
-    if(typeof renderMasterSelectors==='function') renderMasterSelectors();
-    if(typeof toast==='function') toast('유형 추가: ' + val);
-  };
-
-  window.deleteType = function(idx){
-    var master = JSON.parse(localStorage['fs-master']||'{}');
-    var types = master.types || [];
-    var typeName = types[idx];
-    if(!confirm(typeName + ' 유형을 삭제할까요?')) return;
-    types.splice(idx,1);
-    master.types = types;
-    localStorage['fs-master'] = JSON.stringify(master);
-    renderTypeList();
-    if(typeof renderMasterSelectors==='function') renderMasterSelectors();
-    if(typeof toast==='function') toast('유형 삭제: ' + typeName);
-  };
-
-  // openMasterModal 패치
-  if(typeof openMasterModal==='function'){
-    var _orig = openMasterModal;
-    window.openMasterModal = function(){
-      var result = _orig.apply(this,arguments);
-      setTimeout(addTypeManagerUI, 100);
-      return result;
-    };
-  }
-  // 더보기 드롭다운의 관리 버튼 연결 확인
-  setTimeout(function(){
-    if(typeof openMasterModal==='function'){
-      var _orig2 = window.openMasterModal;
-      if(!_orig2._typePatched){
-        _orig2._typePatched = true;
-      }
-    }
-  },500);
-})();
-</script>
 <script id="ks-type-sync">
 (function(){
-  // tf-btn 필터를 master.types에서 동적으로 재생성
+  var _curMasterTab = 'buildings';
+
+  // ─ 유형 필터 동기화 ─
   function syncTypeFilter(){
     var master;
     try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
     var types = master.types || [];
     var container = document.getElementById('type-filter-top');
     if(!container) return;
-
-    // 현재 선택된 유형 기억
     var activeBtn = container.querySelector('.tf-btn.active');
     var activeType = activeBtn ? activeBtn.textContent.trim() : '전체';
-
-    // 버튼 재생성
-    var btns = [
-      '<button class="tf-btn' + (activeType==='전체' ? ' active':'') + '" onclick="switchType('전체',this)">전체</button>'
-    ];
-    types.forEach(function(t){
-      var isActive = (t === activeType) ? ' active' : '';
-      btns.push('<button class="tf-btn'+isActive+'" onclick="switchType(''+t+'',this)">'+t+'</button>');
-    });
-
-    container.innerHTML = btns.join('');
+    container.innerHTML =
+      '<button class="tf-btn'+(activeType==='전체'?' active':'')+'" onclick="switchType('전체',this)">전체</button>' +
+      types.map(function(t){
+        return '<button class="tf-btn'+(t===activeType?' active':'')+'" onclick="switchType(''+t+'',this)">'+t+'</button>';
+      }).join('');
   }
 
-  // addNewType / deleteType 패치해서 필터도 동기화
-  var _addOrig = window.addNewType;
-  if(typeof _addOrig === 'function'){
-    window.addNewType = function(){
-      _addOrig.apply(this, arguments);
-      setTimeout(syncTypeFilter, 100);
-    };
-  }
-  var _delOrig = window.deleteType;
-  if(typeof _delOrig === 'function'){
-    window.deleteType = function(){
-      _delOrig.apply(this, arguments);
-      setTimeout(syncTypeFilter, 100);
-    };
-  }
-
-  // 페이지 로드 시 초기 동기화
+  // ─ 초기화: 설치+수거가 없으면 추가 ─
   function init(){
-    // master.types에 "설치+수거"가 없으면 추가
     var master;
     try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
     if(!master.types) master.types = ['설치','수거','AS','이전','기타'];
     if(!master.types.includes('설치+수거')){
-      var gitaIdx = master.types.indexOf('기타');
-      if(gitaIdx > -1) master.types.splice(gitaIdx, 0, '설치+수거');
+      var gi = master.types.indexOf('기타');
+      if(gi > -1) master.types.splice(gi, 0, '설치+수거');
       else master.types.push('설치+수거');
       localStorage['fs-master'] = JSON.stringify(master);
     }
     syncTypeFilter();
   }
 
-  setTimeout(init, 400);
-  setTimeout(syncTypeFilter, 800);
+  // ─ switchMasterTab 패치: 현재 탭 추적 ─
+  if(typeof switchMasterTab === 'function'){
+    var _st = switchMasterTab;
+    window.switchMasterTab = function(tab, el){
+      _curMasterTab = tab;
+      return _st.apply(this, arguments);
+    };
+  }
 
-  // render 후에도 동기화
+  // ─ addMasterItem 패치: 유형 탭에서 추가 시 필터 동기화 ─
+  if(typeof addMasterItem === 'function'){
+    var _add = addMasterItem;
+    window.addMasterItem = function(){
+      var result = _add.apply(this, arguments);
+      if(_curMasterTab === 'types') setTimeout(syncTypeFilter, 150);
+      return result;
+    };
+  }
+
+  // ─ deleteMasterItem 패치: 유형 탭에서 삭제 시 필터 동기화 ─
+  if(typeof deleteMasterItem === 'function'){
+    var _del = deleteMasterItem;
+    window.deleteMasterItem = function(){
+      var result = _del.apply(this, arguments);
+      if(_curMasterTab === 'types') setTimeout(syncTypeFilter, 150);
+      return result;
+    };
+  }
+
+  // ─ render 후킹: 렌더 후 필터 동기화 ─
   if(typeof render === 'function'){
     var _r = render;
     window.render = function(){
@@ -3882,6 +3797,9 @@ function copyEvent(id) {
       setTimeout(syncTypeFilter, 50);
     };
   }
+
+  setTimeout(init, 400);
+  setTimeout(syncTypeFilter, 900);
 })();
 </script>
 </body></html>
