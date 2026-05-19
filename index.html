@@ -676,6 +676,28 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   text-decoration: underline !important;
 }
 
+
+/* ── 모바일 가로 스크롤 활성화 ── */
+.week-table {
+  overflow-x: scroll !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  touch-action: pan-x pan-y !important;
+}
+/* 스크롤바 힌트 (모바일) */
+@media (max-width: 640px) {
+  .week-table::-webkit-scrollbar {
+    height: 3px !important;
+  }
+  .week-table::-webkit-scrollbar-track {
+    background: var(--border2) !important;
+  }
+  .week-table::-webkit-scrollbar-thumb {
+    background: var(--primary) !important;
+    border-radius: 2px !important;
+  }
+}
+
 </style>
 
 <script>
@@ -3188,6 +3210,12 @@ function copyEvent(id) {
     document.body.style.removeProperty('position');
     document.body.style.removeProperty('width');
     document.body.style.removeProperty('height');
+    // 모바일 스크롤 복원
+    var wt = document.querySelector('.week-table');
+    if(wt) {
+      wt.style.setProperty('overflow-x', 'scroll', 'important');
+      wt.style.setProperty('-webkit-overflow-scrolling', 'touch', 'important');
+    }
   }
 
   function syncApp() {
@@ -3244,7 +3272,8 @@ function copyEvent(id) {
 (function(){
   var MOBILE=window.innerWidth<=640||/Android|iPhone|iPad/i.test(navigator.userAgent);
   if(!MOBILE)return;
-  var W=100;
+  // 화면 너비에 따라 칸 폭 동적 계산 (2일치 이상 보이도록)
+  var W = Math.min(100, Math.floor((window.innerWidth || 390) / 6));
   function fix(){
     // th-date: width + min-width 모두 설정 (핵심)
     document.querySelectorAll('.th-date').forEach(function(th){
