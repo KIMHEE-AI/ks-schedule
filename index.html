@@ -3726,100 +3726,57 @@ function copyEvent(id) {
 </script>
 
 
+
 <script id="ks-type-sync">
 (function(){
-  var _curMasterTab = 'buildings';
-
-  // ─ 유형 필터 동기화 ─
-  function syncTypeFilter(){
-    var master;
-    try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
-    var types = master.types || [];
-    var container = document.getElementById('type-filter-top');
-    if(!container) return;
-    var activeBtn = container.querySelector('.tf-btn.active');
-    var activeType = activeBtn ? activeBtn.textContent.trim() : '전체';
-    container.innerHTML =
-      '<button class="tf-btn'+(activeType==='전체'?' active':'')+'" onclick="switchType('전체',this)">전체</button>' +
-      types.map(function(t){
-        return '<button class="tf-btn'+(t===activeType?' active':'')+'" onclick="switchType(''+t+'',this)">'+t+'</button>';
-      }).join('');
-  }
-
-  // ─ 초기화: 설치+수거가 없으면 추가 + 모달 목록도 갱신 ─
-  function init(){
-    var master;
-    try { master = JSON.parse(localStorage['fs-master']||'{}'); } catch(e){ return; }
-    if(!master.types) master.types = ['설치','수거','AS','이전','기타'];
-    var changed = false;
-    if(!master.types.includes('설치+수거')){
-      var gi = master.types.indexOf('기타');
-      if(gi > -1) master.types.splice(gi, 0, '설치+수거');
-      else master.types.push('설치+수거');
-      localStorage['fs-master'] = JSON.stringify(master);
-      changed = true;
+  function ensureTypes(){
+    var m; try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
+    if(!m.types)m.types=['설치','수거','AS','이전','기타'];
+    if(!m.types.includes('설치+수거')){
+      var gi=m.types.indexOf('기타');
+      if(gi>-1)m.types.splice(gi,0,'설치+수거');else m.types.push('설치+수거');
+      localStorage['fs-master']=JSON.stringify(m);
     }
-    // in-memory master 재로드 → 필터 + 모달 갱신
-    if(typeof loadMaster === 'function') loadMaster();
-    syncTypeFilter();
-    renderTypesFromStorage();
   }
-
-  // ─ 유형 탭 DOM 직접 렌더링 ─
-  function renderTypesFromStorage(){
-    var masterList = document.getElementById('master-list');
-    if(!masterList) return;
-    var types;
-    try { types = JSON.parse(localStorage['fs-master']||'{}').types||[]; } catch(e){ return; }
-    masterList.innerHTML = types.map(function(t,i){
-      return '<div class="master-item"><div class="master-name">'+t+'</div>' +
-        '<div class="master-actions"><button onclick="editMasterItem('+i+')">수정</button>' +
+  function syncFilter(){
+    var c=document.getElementById('type-filter-top');if(!c)return;
+    var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
+    var types=m.types||[];
+    var active=c.querySelector('.tf-btn.active');
+    var cur=active?active.textContent.trim():'전체';
+    c.innerHTML='<button class="tf-btn'+(cur==='전체'?' active':'')+'" onclick="switchType('전체',this)">전체</button>'+
+      types.map(function(t){return '<button class="tf-btn'+(t===cur?' active':'')+'" onclick="switchType(''+t+'',this)">'+t+'</button>';}).join('');
+  }
+  function renderTypes(){
+    var list=document.getElementById('master-list');if(!list)return;
+    var at=document.querySelector('.master-tab.active');if(!at||at.textContent.trim()!=='유형')return;
+    var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
+    var types=m.types||[];
+    list.innerHTML=types.map(function(t,i){
+      return '<div class="master-item"><div class="master-name">'+t+'</div>'+
+        '<div class="master-actions"><button onclick="editMasterItem('+i+')">수정</button>'+
         '<button onclick="deleteMasterItem('+i+')">삭제</button></div></div>';
     }).join('');
   }
-
-  // ─ switchMasterTab 패치: 현재 탭 추적 + 유형 탭 시 직접 렌더 ─
-  if(typeof switchMasterTab === 'function'){
-    var _st = switchMasterTab;
-    window.switchMasterTab = function(tab, el){
-      _curMasterTab = tab;
-      var result = _st.apply(this, arguments);
-      if(tab === 'types') setTimeout(renderTypesFromStorage, 50);
-      return result;
-    };
-  }
-
-  // ─ addMasterItem 패치: 유형 탭에서 추가 시 필터 동기화 ─
-  if(typeof addMasterItem === 'function'){
-    var _add = addMasterItem;
-    window.addMasterItem = function(){
-      var result = _add.apply(this, arguments);
-      if(_curMasterTab === 'types') setTimeout(syncTypeFilter, 150);
-      return result;
-    };
-  }
-
-  // ─ deleteMasterItem 패치: 유형 탭에서 삭제 시 필터 동기화 ─
-  if(typeof deleteMasterItem === 'function'){
-    var _del = deleteMasterItem;
-    window.deleteMasterItem = function(){
-      var result = _del.apply(this, arguments);
-      if(_curMasterTab === 'types') setTimeout(syncTypeFilter, 150);
-      return result;
-    };
-  }
-
-  // ─ render 후킹: 렌더 후 필터 동기화 ─
-  if(typeof render === 'function'){
-    var _r = render;
-    window.render = function(){
-      _r.apply(this, arguments);
-      setTimeout(syncTypeFilter, 50);
-    };
-  }
-
-  setTimeout(init, 400);
-  setTimeout(syncTypeFilter, 900);
+  window.addEventListener('load',function(){
+    ensureTypes(); syncFilter();
+    if(typeof renderMasterList==='function'){
+      var _rml=renderMasterList;
+      window.renderMasterList=function(){_rml.apply(this,arguments);setTimeout(renderTypes,30);};
+    }
+    ['addMasterItem','deleteMasterItem'].forEach(function(fn){
+      if(typeof window[fn]==='function'){
+        var _o=window[fn];
+        window[fn]=function(){var r=_o.apply(this,arguments);setTimeout(function(){ensureTypes();syncFilter();renderTypes();},100);return r;};
+      }
+    });
+    if(typeof render==='function'){
+      var _r=render;
+      window.render=function(){_r.apply(this,arguments);setTimeout(syncFilter,50);};
+    }
+  });
+  setTimeout(function(){ensureTypes();syncFilter();},500);
+  setTimeout(function(){ensureTypes();syncFilter();renderTypes();},1000);
 })();
 </script>
 </body></html>
