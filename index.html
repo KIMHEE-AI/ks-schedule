@@ -1511,7 +1511,7 @@ function loadMaster(){
 function normalizeMaster(m){
   const b=Array.isArray(m.buildings)&&m.buildings.length?m.buildings:DEFAULT_MASTER.buildings;
   const s=Array.isArray(m.services)&&m.services.length?m.services:DEFAULT_MASTER.services;
-  const t=Array.isArray(m.types)&&m.types.length?m.types:DEFAULT_MASTER.types;
+  const t=Array.isArray(m.types)&&m.types.length?m.types.slice():DEFAULT_MASTER.types.slice();if(!t.includes('설치+수거')){var _gi=t.indexOf('기타');if(_gi>-1)t.splice(_gi,0,'설치+수거');else t.push('설치+수거');}
   let w=Array.isArray(m.workers)&&m.workers.length?m.workers:DEFAULT_MASTER.workers;
   w=w.map(x=>typeof x==='string'?{key:x,name:STAFF_NAME[x]||x,color:STAFF_COLOR[x]||'#64748b'}:{key:x.key||x.name,name:x.name||x.key,color:x.color||STAFF_COLOR[x.key]||'#64748b'}).filter(x=>x.key);
   return {buildings:[...new Set(b.map(x=>String(x).trim()).filter(Boolean))],services:[...new Set(s.map(x=>String(x).trim()).filter(Boolean))],types:[...new Set(t.map(x=>String(x).trim()).filter(Boolean))],workers:w};
