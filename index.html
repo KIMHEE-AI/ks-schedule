@@ -1998,6 +1998,19 @@ function render(){
   });
   tbody.appendChild(tr);
   renderListView(filtered,days);
+  // 유형 필터 동기화 (master.types 기준 show/hide)
+  (function(){
+    var c=document.getElementById("type-filter-top");if(!c)return;
+    var m;try{m=JSON.parse(localStorage["fs-master"]||"{}");}catch(e){return;}
+    var types=m.types||[];
+    var btns=c.querySelectorAll(".tf-btn");
+    var isFirst=true;
+    btns.forEach(function(btn){
+      if(isFirst){isFirst=false;btn.style.display="";return;}
+      var t=btn.dataset.t||btn.textContent.trim();
+      btn.style.display=types.indexOf(t)>-1?"":"none";
+    });
+  })();
 }
 
 // ════ 보기 전환 / 예약목록 ════
