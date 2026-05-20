@@ -2367,7 +2367,7 @@ function editMasterItem(i){
   saveData();
   saveMaster();
   toast('수정 완료 ✓');
-  if(typeof window._ksSyncFilter==='function')setTimeout(function(){(function(){var c=document.getElementById("type-filter-top");if(!c)return;var m;try{m=JSON.parse(localStorage["fs-master"]||"{}");}catch(e){return;}var types=m.types||[];var ac=c.querySelector(".tf-btn.active");var cur=ac?ac.textContent.trim():"전체";var h="<button class=\"tf-btn"+(cur==="전체"?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify("전체")+",this)\">전체</button>";types.forEach(function(t){h+="<button class=\"tf-btn"+(t===cur?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify(t)+",this)\">"+t+"</button>";});c.innerHTML=h;})();},50);
+  setTimeout(function(){(function(){var c=document.getElementById("type-filter-top");if(!c)return;var m;try{m=JSON.parse(localStorage["fs-master"]||"{}");}catch(e){return;}var types=m.types||[];var ac=c.querySelector(".tf-btn.active");var cur=ac?ac.textContent.trim():"전체";var h="<button class=\"tf-btn"+(cur==="전체"?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify("전체")+",this)\">전체</button>";types.forEach(function(t){h+="<button class=\"tf-btn"+(t===cur?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify(t)+",this)\">"+t+"</button>";});c.innerHTML=h;})();},50);
 }
 function deleteMasterItem(i){
   if(activeMasterTab==='workers'){
@@ -2382,7 +2382,7 @@ function deleteMasterItem(i){
   }
   saveMaster();
   toast('삭제 완료');
-  if(typeof window._ksSyncFilter==='function')setTimeout(function(){(function(){var c=document.getElementById("type-filter-top");if(!c)return;var m;try{m=JSON.parse(localStorage["fs-master"]||"{}");}catch(e){return;}var types=m.types||[];var ac=c.querySelector(".tf-btn.active");var cur=ac?ac.textContent.trim():"전체";var h="<button class=\"tf-btn"+(cur==="전체"?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify("전체")+",this)\">전체</button>";types.forEach(function(t){h+="<button class=\"tf-btn"+(t===cur?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify(t)+",this)\">"+t+"</button>";});c.innerHTML=h;})();},50);
+  setTimeout(function(){(function(){var c=document.getElementById("type-filter-top");if(!c)return;var m;try{m=JSON.parse(localStorage["fs-master"]||"{}");}catch(e){return;}var types=m.types||[];var ac=c.querySelector(".tf-btn.active");var cur=ac?ac.textContent.trim():"전체";var h="<button class=\"tf-btn"+(cur==="전체"?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify("전체")+",this)\">전체</button>";types.forEach(function(t){h+="<button class=\"tf-btn"+(t===cur?" active":"")+"\""+" onclick=\"switchType("+JSON.stringify(t)+",this)\">"+t+"</button>";});c.innerHTML=h;})();},50);
 }
 function pickWorkerColor(n){return ['#2563eb','#16a34a','#ea580c','#7c3aed','#0891b2','#db2777'][n%6]}
 
