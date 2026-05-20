@@ -3727,17 +3727,22 @@ function copyEvent(id) {
 
 
 
+
 <script id="ks-type-sync">
 (function(){
+  // 설치+수거 즉시 추가 (타임아웃 없이)
   function ensureTypes(){
-    var m; try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
+    var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
     if(!m.types)m.types=['설치','수거','AS','이전','기타'];
     if(!m.types.includes('설치+수거')){
       var gi=m.types.indexOf('기타');
       if(gi>-1)m.types.splice(gi,0,'설치+수거');else m.types.push('설치+수거');
       localStorage['fs-master']=JSON.stringify(m);
     }
+    return m.types;
   }
+
+  // 필터버튼 동기화
   function syncFilter(){
     var c=document.getElementById('type-filter-top');if(!c)return;
     var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
@@ -3747,9 +3752,15 @@ function copyEvent(id) {
     c.innerHTML='<button class="tf-btn'+(cur==='전체'?' active':'')+'" onclick="switchType('전체',this)">전체</button>'+
       types.map(function(t){return '<button class="tf-btn'+(t===cur?' active':'')+'" onclick="switchType(''+t+'',this)">'+t+'</button>';}).join('');
   }
+
+  // 유형탭 DOM 직접 렌더
   function renderTypes(){
     var list=document.getElementById('master-list');if(!list)return;
-    var at=document.querySelector('.master-tab.active');if(!at||at.textContent.trim()!=='유형')return;
+    // 활성 탭이 유형인지 확인 (.active 클래스 체크)
+    var activeTabs=document.querySelectorAll('.master-tab.active,.master-tab.on');
+    var isTypeTab=false;
+    activeTabs.forEach(function(t){if(t.textContent.trim()==='유형')isTypeTab=true;});
+    if(!isTypeTab)return;
     var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
     var types=m.types||[];
     list.innerHTML=types.map(function(t,i){
@@ -3758,25 +3769,54 @@ function copyEvent(id) {
         '<button onclick="deleteMasterItem('+i+')">삭제</button></div></div>';
     }).join('');
   }
+
+  // 즉시 실행 (페이지 로드 즉시)
+  ensureTypes();
+
   window.addEventListener('load',function(){
-    ensureTypes(); syncFilter();
+    ensureTypes();
+    syncFilter();
+
+    // renderMasterList 패치
     if(typeof renderMasterList==='function'){
       var _rml=renderMasterList;
-      window.renderMasterList=function(){_rml.apply(this,arguments);setTimeout(renderTypes,30);};
+      window.renderMasterList=function(){
+        _rml.apply(this,arguments);
+        setTimeout(renderTypes,50);
+      };
     }
+
+    // openMasterModal 패치 - 열릴 때마다 ensureTypes 실행
+    if(typeof openMasterModal==='function'){
+      var _om=openMasterModal;
+      window.openMasterModal=function(){
+        ensureTypes(); // 모달 열기 전 즉시 실행
+        return _om.apply(this,arguments);
+      };
+    }
+
+    // addMasterItem / deleteMasterItem 패치
     ['addMasterItem','deleteMasterItem'].forEach(function(fn){
       if(typeof window[fn]==='function'){
         var _o=window[fn];
-        window[fn]=function(){var r=_o.apply(this,arguments);setTimeout(function(){ensureTypes();syncFilter();renderTypes();},100);return r;};
+        window[fn]=function(){
+          var r=_o.apply(this,arguments);
+          setTimeout(function(){ensureTypes();syncFilter();renderTypes();},100);
+          return r;
+        };
       }
     });
+
+    // render 후킹
     if(typeof render==='function'){
       var _r=render;
       window.render=function(){_r.apply(this,arguments);setTimeout(syncFilter,50);};
     }
   });
-  setTimeout(function(){ensureTypes();syncFilter();},500);
-  setTimeout(function(){ensureTypes();syncFilter();renderTypes();},1000);
+
+  // 추가 안전장치 - 100ms / 600ms 후 재실행
+  setTimeout(function(){ensureTypes();syncFilter();},100);
+  setTimeout(function(){ensureTypes();syncFilter();},600);
 })();
 </script>
 </body></html>
