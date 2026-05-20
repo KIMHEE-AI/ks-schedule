@@ -3732,8 +3732,10 @@ function copyEvent(id) {
 
 
 
+
 <script id="ks-type-sync">
 (function(){
+  // 필터버튼 동기화 (즉시 전역 노출)
   function syncFilter(){
     var c=document.getElementById('type-filter-top');if(!c)return;
     var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
@@ -3743,12 +3745,13 @@ function copyEvent(id) {
     c.innerHTML='<button class="tf-btn'+(cur==='전체'?' active':'')+'" onclick="switchType('전체',this)">전체</button>'+
       types.map(function(t){return '<button class="tf-btn'+(t===cur?' active':'')+'" onclick="switchType(''+t+'',this)">'+t+'</button>';}).join('');
   }
-  window._ksSyncFilter=syncFilter;
+  window._ksSyncFilter=syncFilter; // 즉시 전역 노출!
 
+  // 유형탭 모달 DOM 렌더
   function renderTypes(){
     var list=document.getElementById('master-list');if(!list)return;
-    var activeTabs=[].slice.call(document.querySelectorAll('.master-tab.active,.master-tab.on'));
-    if(!activeTabs.some(function(t){return t.textContent.trim()==='유형';}))return;
+    var at=[].slice.call(document.querySelectorAll('.master-tab.active,.master-tab.on'));
+    if(!at.some(function(t){return t.textContent.trim()==='유형';}))return;
     var m;try{m=JSON.parse(localStorage['fs-master']||'{}');}catch(e){return;}
     list.innerHTML=(m.types||[]).map(function(t,i){
       return '<div class="master-item"><div class="master-name">'+t+'</div>'+
@@ -3757,13 +3760,14 @@ function copyEvent(id) {
     }).join('');
   }
 
+  // MutationObserver: #master-list 바뀌면 유형탭일 때 localStorage로 덮어씀
   function setupObserver(){
     var list=document.getElementById('master-list');
     if(!list||list._ksObs)return;
     list._ksObs=true;
     var obs=new MutationObserver(function(){
-      var activeTabs=[].slice.call(document.querySelectorAll('.master-tab.active,.master-tab.on'));
-      if(!activeTabs.some(function(t){return t.textContent.trim()==='유형';}))return;
+      var at=[].slice.call(document.querySelectorAll('.master-tab.active,.master-tab.on'));
+      if(!at.some(function(t){return t.textContent.trim()==='유형';}))return;
       var current=[].slice.call(list.querySelectorAll('.master-name')).map(function(el){return el.textContent.trim();});
       var stored;try{stored=(JSON.parse(localStorage['fs-master']||'{}').types||[]);}catch(e){return;}
       if(JSON.stringify(current)!==JSON.stringify(stored)){
@@ -3775,9 +3779,8 @@ function copyEvent(id) {
     obs.observe(list,{childList:true,subtree:true});
   }
 
-  function init(){
-    syncFilter();
-    setupObserver();
+  // render 후킹
+  function hookRender(){
     if(typeof render==='function'&&!render._ksSynced){
       var _r=render;
       window.render=function(){_r.apply(this,arguments);setTimeout(syncFilter,50);};
@@ -3785,13 +3788,15 @@ function copyEvent(id) {
     }
   }
 
+  // DOM 준비 후 실행
+  function init(){syncFilter();setupObserver();hookRender();}
   if(document.readyState==='loading'){
     document.addEventListener('DOMContentLoaded',init);
   } else {
     init();
   }
-  setTimeout(init,200);
-  setTimeout(init,800);
+  setTimeout(init,300);
+  setTimeout(init,900);
 })();
 </script>
 </body></html>
