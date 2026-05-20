@@ -2366,6 +2366,7 @@ function editMasterItem(i){
   saveData();
   saveMaster();
   toast('수정 완료 ✓');
+  if(typeof window._ksSyncFilter==='function')setTimeout(window._ksSyncFilter,50);
 }
 function deleteMasterItem(i){
   if(activeMasterTab==='workers'){
@@ -2380,6 +2381,7 @@ function deleteMasterItem(i){
   }
   saveMaster();
   toast('삭제 완료');
+  if(typeof window._ksSyncFilter==='function')setTimeout(window._ksSyncFilter,50);
 }
 function pickWorkerColor(n){return ['#2563eb','#16a34a','#ea580c','#7c3aed','#0891b2','#db2777'][n%6]}
 
@@ -3792,6 +3794,7 @@ function copyEvent(id) {
   });
 
   setTimeout(syncFilter,300);
+  window._ksSyncFilter=syncFilter;
 })();
 </script>
 </body></html>
