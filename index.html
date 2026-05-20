@@ -3770,10 +3770,11 @@ function copyEvent(id) {
     });
     obs.observe(list,{childList:true,subtree:true});
   }
-  function init(){setupObserver();}
+  function init(){syncFilter();setupObserver();}
   if(document.readyState==="loading"){
     document.addEventListener("DOMContentLoaded",init);
   } else { init(); }
+  syncFilter();
   setTimeout(init,300);
 })();
 </script>
