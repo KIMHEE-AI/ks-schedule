@@ -698,6 +698,39 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
   }
 }
 
+
+/* ── 배율/스크롤 컨트롤 ── */
+.scale-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:6px 12px;
+  background:var(--surface2);
+  border-bottom:1px solid var(--border2);
+  position:sticky;left:0;z-index:10;
+}
+.scale-bar-label{font-size:12px;color:var(--text3);white-space:nowrap;}
+.scale-btn{
+  width:28px;height:28px;border:1px solid var(--border2);
+  background:var(--surface);border-radius:6px;cursor:pointer;
+  font-size:16px;font-weight:700;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;user-select:none;
+}
+.scale-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.scale-pct{
+  min-width:44px;text-align:center;font-size:13px;font-weight:600;
+  color:var(--text1);cursor:pointer;padding:4px 6px;
+  border-radius:6px;background:var(--surface);border:1px solid var(--border2);
+}
+.scale-pct:hover{border-color:var(--primary);}
+.scroll-btn{
+  width:32px;height:28px;border:1px solid var(--border2);
+  background:var(--surface);border-radius:6px;cursor:pointer;
+  font-size:15px;color:var(--text2);
+  display:flex;align-items:center;justify-content:center;
+  transition:background .15s;user-select:none;
+}
+.scroll-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary);}
+.scale-sep{width:1px;height:20px;background:var(--border2);margin:0 2px;}
 </style>
 
 <script>
@@ -855,6 +888,17 @@ body.sel-mode .ev-item:not(.selected) { opacity: .75; }
         <button class="btn btn-ghost btn-sm" onclick="goToday()">오늘</button>
         <button class="nav-btn" onclick="changeWeek(1)">›</button>
       </div>
+    </div>
+    <div class="scale-bar" id="scale-bar">
+      <span class="scale-label" style="font-size:12px;color:var(--text3)">배율</span>
+      <button class="scale-btn" onclick="calZoom(-10)" title="축소">−</button>
+      <span class="scale-pct" id="scale-pct" onclick="calZoomReset()" title="클릭시 100% 초기화">100%</span>
+      <button class="scale-btn" onclick="calZoom(10)" title="확대">+</button>
+      <div class="scale-sep"></div>
+      <span class="scale-label" style="font-size:12px;color:var(--text3)">스크롤</span>
+      <button class="scroll-btn" onclick="calScroll(-300)" title="왼쪽">◀</button>
+      <button class="scroll-btn" onclick="calScroll(300)" title="오른쪽">▶</button>
+      <button class="scroll-btn" onclick="calScrollToday()" title="오늘로" style="width:44px;font-size:11px;font-weight:600">오늘</button>
     </div>
     <div class="week-table" id="week-table-wrap">
       <table id="week-table">
@@ -3789,6 +3833,53 @@ function copyEvent(id) {
   } else { init(); }
   syncFilter();
   setTimeout(init,300);
+})();
+</script>
+<script id="ks-zoom">
+(function(){
+  var _scale = parseInt(localStorage.getItem("ks-cal-scale")||"100");
+  
+  function applyScale(){
+    var wrap = document.getElementById("week-table-wrap");
+    if(!wrap) return;
+    var tbl = wrap.querySelector("table");
+    if(tbl) {
+      tbl.style.transformOrigin = "top left";
+      tbl.style.transform = "scale(" + (_scale/100) + ")";
+      tbl.style.marginBottom = "-" + Math.round(tbl.offsetHeight*(1-_scale/100)) + "px";
+      // wrap 높이 조정
+      wrap.style.height = Math.round(tbl.offsetHeight*(_scale/100)+40) + "px";
+    }
+    var pct = document.getElementById("scale-pct");
+    if(pct) pct.textContent = _scale + "%";
+    localStorage.setItem("ks-cal-scale", _scale);
+  }
+  
+  window.calZoom = function(delta){
+    _scale = Math.min(150, Math.max(50, _scale+delta));
+    applyScale();
+  };
+  window.calZoomReset = function(){
+    _scale = 100;
+    applyScale();
+  };
+  window.calScroll = function(dx){
+    var wrap = document.getElementById("week-table-wrap");
+    if(wrap) wrap.scrollLeft += dx;
+  };
+  window.calScrollToday = function(){
+    var wrap = document.getElementById("week-table-wrap");
+    var today = wrap&&wrap.querySelector("th.today, th[class*=today], td[class*=today]");
+    if(today) today.scrollIntoView({behavior:"smooth",block:"nearest",inline:"center"});
+    else if(wrap) wrap.scrollLeft = 0;
+  };
+  
+  // 초기 적용 + render 후 재적용
+  setTimeout(applyScale, 400);
+  if(typeof render==="function"){
+    var _r=render;
+    window.render=function(){_r.apply(this,arguments);setTimeout(applyScale,50);};
+  }
 })();
 </script>
 </body></html>
